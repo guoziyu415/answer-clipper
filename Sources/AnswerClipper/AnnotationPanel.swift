@@ -49,6 +49,27 @@ final class AnnotationPanelController: NSWindowController {
         NSApp.activate(ignoringOtherApps: true)
         showWindow(nil)
         window.makeKeyAndOrderFront(nil)
+
+        DispatchQueue.main.async { [weak window] in
+            guard let window,
+                  let textView = window.contentView?.firstDescendant(of: NSTextView.self)
+            else { return }
+            window.makeFirstResponder(textView)
+        }
+    }
+}
+
+private extension NSView {
+    func firstDescendant<T: NSView>(of type: T.Type) -> T? {
+        if let matchingView = self as? T {
+            return matchingView
+        }
+        for subview in subviews {
+            if let matchingView = subview.firstDescendant(of: type) {
+                return matchingView
+            }
+        }
+        return nil
     }
 }
 

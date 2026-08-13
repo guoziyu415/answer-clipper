@@ -8,6 +8,7 @@ CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 CLANG_CACHE_DIR="$PROJECT_DIR/.build/clang-module-cache"
 SWIFTPM_CACHE_DIR="$PROJECT_DIR/.build/swiftpm-module-cache"
+SIGN_IDENTITY="${CODE_SIGN_IDENTITY:--}"
 
 cd "$PROJECT_DIR"
 mkdir -p "$CLANG_CACHE_DIR" "$SWIFTPM_CACHE_DIR"
@@ -22,7 +23,7 @@ cp "$PROJECT_DIR/.build/release/AnswerClipper" "$MACOS_DIR/AnswerClipper"
 cp "$PROJECT_DIR/Resources/Info.plist" "$CONTENTS_DIR/Info.plist"
 
 xattr -cr "$APP_DIR"
-codesign --force --deep --sign - "$APP_DIR"
+codesign --force --deep --sign "$SIGN_IDENTITY" "$APP_DIR"
 xattr -d com.apple.FinderInfo "$APP_DIR" 2>/dev/null || true
 xattr -d 'com.apple.fileprovider.fpfs#P' "$APP_DIR" 2>/dev/null || true
 

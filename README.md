@@ -42,6 +42,14 @@ swift test
 
 项目使用 Swift Package Manager，无第三方依赖，支持 macOS 13 及以上版本。
 
+开发过程中如果需要让辅助功能授权在重新构建后保持有效，可以使用稳定的开发签名：
+
+```bash
+CODE_SIGN_IDENTITY="Apple Development: your-name@example.com (TEAMID)" ./scripts/build-app.sh
+```
+
+未设置 `CODE_SIGN_IDENTITY` 时，构建脚本使用本地临时签名。
+
 ## Markdown 格式
 
 每条摘录由原文、可选批注、类型、标签、来源应用和时间组成：

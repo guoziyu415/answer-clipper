@@ -74,6 +74,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func captureSelection(forAnnotation: Bool) {
+        guard selectionCapture.isAccessibilityTrusted else {
+            selectionCapture.requestAccessibilityPermission()
+            toast.show("请先授予辅助功能权限")
+            return
+        }
+
         let sourceApplication = NSWorkspace.shared.frontmostApplication?.localizedName
 
         selectionCapture.capture { [weak self] selectedText in
