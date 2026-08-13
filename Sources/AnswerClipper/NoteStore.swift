@@ -33,7 +33,11 @@ final class NoteStore {
         if let storedPath = defaults.string(forKey: Keys.notePath), !storedPath.isEmpty {
             return URL(fileURLWithPath: storedPath)
         }
-        return FileManager.default.homeDirectoryForCurrentUser
+        return defaultNoteURL
+    }
+
+    var defaultNoteURL: URL {
+        FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Documents", isDirectory: true)
             .appendingPathComponent("AnswerClipper", isDirectory: true)
             .appendingPathComponent("Inbox.md", isDirectory: false)
@@ -43,20 +47,29 @@ final class NoteStore {
         defaults.set(url.path, forKey: Keys.notePath)
     }
 
+    func resetNoteURL() {
+        defaults.removeObject(forKey: Keys.notePath)
+    }
+
     func ensureFileExists() throws {
-        let directory = noteURL.deletingLastPathComponent()
+        try ensureFileExists(at: noteURL)
+    }
+
+    func ensureFileExists(at url: URL) throws {
+        let directory = url.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        if !FileManager.default.fileExists(atPath: noteURL.path) {
-            try "# Answer Clipper\n\n".write(to: noteURL, atomically: true, encoding: .utf8)
+        if !FileManager.default.fileExists(atPath: url.path) {
+            try "# Answer Clipper\n\n".write(to: url, atomically: true, encoding: .utf8)
         }
     }
 
-    func append(_ clip: Clip) throws {
-        try ensureFileExists()
+    func append(_ clip: Clip, to destinationURL: URL? = nil) throws {
+        let targetURL = destinationURL ?? noteURL
+        try ensureFileExists(at: targetURL)
         guard let data = MarkdownFormatter.entry(for: clip).data(using: .utf8) else {
             throw CocoaError(.fileWriteInapplicableStringEncoding)
         }
-        let handle = try FileHandle(forWritingTo: noteURL)
+        let handle = try FileHandle(forWritingTo: targetURL)
         defer { try? handle.close() }
         try handle.seekToEnd()
         try handle.write(contentsOf: data)

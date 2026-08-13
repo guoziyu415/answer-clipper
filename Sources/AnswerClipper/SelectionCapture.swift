@@ -2,6 +2,10 @@ import AppKit
 import ApplicationServices
 
 final class SelectionCapture {
+    var isAccessibilityTrusted: Bool {
+        AXIsProcessTrusted()
+    }
+
     func requestAccessibilityPermission() {
         let options = [
             kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true
