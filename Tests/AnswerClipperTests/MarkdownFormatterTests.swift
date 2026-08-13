@@ -37,4 +37,18 @@ final class MarkdownFormatterTests: XCTestCase {
         XCTAssertFalse(markdown.contains("**标签：**"))
         XCTAssertTrue(markdown.contains("**类型：** 重点"))
     }
+
+    func testNoteStoreCanResetCustomDefaultLocation() {
+        let suiteName = "AnswerClipperTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = NoteStore(defaults: defaults)
+        let customURL = URL(fileURLWithPath: "/tmp/custom-answer-clipper.md")
+
+        store.setNoteURL(customURL)
+        XCTAssertEqual(store.noteURL, customURL)
+
+        store.resetNoteURL()
+        XCTAssertEqual(store.noteURL, store.defaultNoteURL)
+    }
 }
