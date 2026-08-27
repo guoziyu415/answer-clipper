@@ -17,7 +17,7 @@ The project includes a macOS app for system-wide annotation, a Chrome extension 
 
 ## Download
 
-Download the latest macOS app and Chrome extension from [GitHub Releases](https://github.com/guoziyu415/answer-clipper/releases/latest).
+Download the latest macOS app from [GitHub Releases](https://github.com/guoziyu415/answer-clipper/releases/latest). The Chrome extension is included directly in the repository under `chrome-extension`.
 
 ## macOS app
 
@@ -57,13 +57,13 @@ Without `CODE_SIGN_IDENTITY`, the build script uses a local ad-hoc signature.
 
 The Chrome extension works on `chatgpt.com`. It does not require macOS Accessibility permission and cannot read the ChatGPT desktop app.
 
-### Install a release
+### Install from GitHub
 
-1. Download `Answer-Clipper-Chrome-v0.1.0.zip` from GitHub Releases.
-2. Unzip the archive.
+1. Download the repository with **Code > Download ZIP**, or clone it with Git.
+2. Unzip the repository archive if necessary.
 3. Open `chrome://extensions` in Chrome.
 4. Enable **Developer mode**.
-5. Select **Load unpacked** and choose the unzipped extension folder.
+5. Select **Load unpacked** and choose the repository's `chrome-extension` folder.
 6. Open or refresh `https://chatgpt.com`.
 7. Select text in an answer and click **Annotate**.
 
