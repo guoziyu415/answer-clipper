@@ -100,9 +100,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        let sourceApplication = NSWorkspace.shared.frontmostApplication?.localizedName
+        guard let sourceApplication = NSWorkspace.shared.frontmostApplication else { return }
 
-        selectionCapture.capture { [weak self] selectedText in
+        selectionCapture.capture(in: sourceApplication.processIdentifier) { [weak self] selectedText in
             guard let self else { return }
             guard let selectedText, !selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 self.toast.show("没有读取到选中文字")
@@ -110,7 +110,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
 
             if forAnnotation {
-                self.showAnnotationPanel(text: selectedText, sourceApplication: sourceApplication)
+                self.showAnnotationPanel(
+                    text: selectedText,
+                    sourceApplication: sourceApplication.localizedName
+                )
             } else {
                 do {
                     let clip = Clip(
@@ -118,7 +121,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         annotation: "",
                         kind: .highlight,
                         tags: [],
-                        sourceApplication: sourceApplication,
+                        sourceApplication: sourceApplication.localizedName,
                         createdAt: Date()
                     )
                     try self.noteStore.append(clip)

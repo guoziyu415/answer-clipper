@@ -1,5 +1,9 @@
 .DS_Store
+.tools/
 .build/
 build/
 *.xcodeproj/xcuserdata/
 DerivedData/
+dist/
+node_modules/
+plugins/answer-clipper/data/*.json

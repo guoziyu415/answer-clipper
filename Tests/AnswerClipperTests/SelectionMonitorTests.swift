@@ -3,6 +3,16 @@ import XCTest
 @testable import AnswerClipper
 
 final class SelectionMonitorTests: XCTestCase {
+    func testMissingSelectionDoesNotPresentBubble() {
+        XCTAssertFalse(SelectionMonitor.hasMeaningfulSelection(nil))
+        XCTAssertFalse(SelectionMonitor.hasMeaningfulSelection(""))
+        XCTAssertFalse(SelectionMonitor.hasMeaningfulSelection("  \n\t"))
+    }
+
+    func testRealTextSelectionPresentsBubble() {
+        XCTAssertTrue(SelectionMonitor.hasMeaningfulSelection("选中的文字"))
+    }
+
     func testDragTriggersSelectionInspection() {
         XCTAssertTrue(
             SelectionMonitor.shouldInspectSelection(

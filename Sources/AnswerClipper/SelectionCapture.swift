@@ -13,86 +13,132 @@ final class SelectionCapture {
         _ = AXIsProcessTrustedWithOptions(options)
     }
 
-    func capture(completion: @escaping (String?) -> Void) {
-        if let selectedText = accessibilitySelection(), !selectedText.isEmpty {
-            completion(selectedText)
-            return
-        }
-        captureThroughClipboard(completion: completion)
+    /// Electron/Chromium keeps its web accessibility tree disabled until an
+    /// assistive client asks for it. This does not access the clipboard.
+    func prepareApplication(processIdentifier: pid_t) {
+        guard AXIsProcessTrusted() else { return }
+        let application = AXUIElementCreateApplication(processIdentifier)
+        _ = AXUIElementSetAttributeValue(
+            application,
+            "AXManualAccessibility" as CFString,
+            kCFBooleanTrue
+        )
+        _ = AXUIElementSetAttributeValue(
+            application,
+            "AXEnhancedUserInterface" as CFString,
+            kCFBooleanTrue
+        )
     }
 
-    private func accessibilitySelection() -> String? {
-        guard AXIsProcessTrusted() else { return nil }
+    func capture(
+        in processIdentifier: pid_t,
+        completion: @escaping (String?) -> Void
+    ) {
+        prepareApplication(processIdentifier: processIdentifier)
+
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.06) {
+            let selectedText = Self.selectedText(in: processIdentifier)
+            DispatchQueue.main.async {
+                completion(selectedText)
+            }
+        }
+    }
+
+    private static func selectedText(in processIdentifier: pid_t) -> String? {
+        let application = AXUIElementCreateApplication(processIdentifier)
+
+        if let focused = elementAttribute(application, kAXFocusedUIElementAttribute),
+           let text = selectedText(from: focused) {
+            return text
+        }
 
         let system = AXUIElementCreateSystemWide()
-        var focusedValue: CFTypeRef?
-        let focusedStatus = AXUIElementCopyAttributeValue(
-            system,
-            kAXFocusedUIElementAttribute as CFString,
-            &focusedValue
-        )
-        guard focusedStatus == .success, let focusedValue else { return nil }
-
-        let focusedElement = focusedValue as! AXUIElement
-        var selectedValue: CFTypeRef?
-        let selectedStatus = AXUIElementCopyAttributeValue(
-            focusedElement,
-            kAXSelectedTextAttribute as CFString,
-            &selectedValue
-        )
-        guard selectedStatus == .success else { return nil }
-        return selectedValue as? String
-    }
-
-    private func captureThroughClipboard(completion: @escaping (String?) -> Void) {
-        let pasteboard = NSPasteboard.general
-        let snapshot = PasteboardSnapshot(pasteboard: pasteboard)
-        pasteboard.clearContents()
-
-        postCopyShortcut()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
-            let selectedText = pasteboard.string(forType: .string)
-            snapshot.restore(to: pasteboard)
-            completion(selectedText)
+        if let focused = elementAttribute(system, kAXFocusedUIElementAttribute),
+           let text = selectedText(from: focused) {
+            return text
         }
-    }
 
-    private func postCopyShortcut() {
-        guard
-            let keyDown = CGEvent(keyboardEventSource: nil, virtualKey: 8, keyDown: true),
-            let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: 8, keyDown: false)
-        else { return }
+        // Chromium exposes document selections on its AXWebArea. Search the
+        // enabled tree with a hard cap so a malformed hierarchy cannot stall.
+        var queue: [AXUIElement] = [application]
+        var index = 0
+        let maximumElements = 4_000
 
-        keyDown.flags = .maskCommand
-        keyUp.flags = .maskCommand
-        keyDown.post(tap: .cghidEventTap)
-        keyUp.post(tap: .cghidEventTap)
-    }
-}
+        while index < queue.count, index < maximumElements {
+            let element = queue[index]
+            index += 1
 
-private struct PasteboardSnapshot {
-    private let items: [[NSPasteboard.PasteboardType: Data]]
-
-    init(pasteboard: NSPasteboard) {
-        items = (pasteboard.pasteboardItems ?? []).map { item in
-            Dictionary(uniqueKeysWithValues: item.types.compactMap { type in
-                item.data(forType: type).map { (type, $0) }
-            })
-        }
-    }
-
-    func restore(to pasteboard: NSPasteboard) {
-        pasteboard.clearContents()
-        let restoredItems = items.map { values -> NSPasteboardItem in
-            let item = NSPasteboardItem()
-            for (type, data) in values {
-                item.setData(data, forType: type)
+            if let text = selectedText(from: element) {
+                return text
             }
-            return item
+            queue.append(contentsOf: children(of: element))
         }
-        if !restoredItems.isEmpty {
-            pasteboard.writeObjects(restoredItems)
+        return nil
+    }
+
+    private static func selectedText(from element: AXUIElement) -> String? {
+        if let text = stringAttribute(element, kAXSelectedTextAttribute),
+           !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return text
+        }
+
+        var markerRange: CFTypeRef?
+        let rangeStatus = AXUIElementCopyAttributeValue(
+            element,
+            "AXSelectedTextMarkerRange" as CFString,
+            &markerRange
+        )
+        guard rangeStatus == .success, let markerRange else { return nil }
+
+        var value: CFTypeRef?
+        let textStatus = AXUIElementCopyParameterizedAttributeValue(
+            element,
+            "AXStringForTextMarkerRange" as CFString,
+            markerRange,
+            &value
+        )
+        guard textStatus == .success,
+              let text = value as? String,
+              !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else { return nil }
+        return text
+    }
+
+    private static func stringAttribute(
+        _ element: AXUIElement,
+        _ attribute: String
+    ) -> String? {
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, attribute as CFString, &value) == .success
+        else { return nil }
+        return value as? String
+    }
+
+    private static func elementAttribute(
+        _ element: AXUIElement,
+        _ attribute: String
+    ) -> AXUIElement? {
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, attribute as CFString, &value) == .success,
+              let value,
+              CFGetTypeID(value) == AXUIElementGetTypeID()
+        else { return nil }
+        return unsafeBitCast(value, to: AXUIElement.self)
+    }
+
+    private static func children(of element: AXUIElement) -> [AXUIElement] {
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(
+            element,
+            kAXChildrenAttribute as CFString,
+            &value
+        ) == .success,
+              let rawChildren = value as? [CFTypeRef]
+        else { return [] }
+
+        return rawChildren.compactMap { child in
+            guard CFGetTypeID(child) == AXUIElementGetTypeID() else { return nil }
+            return unsafeBitCast(child, to: AXUIElement.self)
         }
     }
 }

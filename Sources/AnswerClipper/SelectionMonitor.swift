@@ -27,6 +27,12 @@ final class SelectionMonitor {
         mouseDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { [weak self] _ in
             DispatchQueue.main.async {
                 self?.mouseDownPoint = NSEvent.mouseLocation
+                guard let application = NSWorkspace.shared.frontmostApplication,
+                      application.processIdentifier != ProcessInfo.processInfo.processIdentifier
+                else { return }
+                self?.selectionCapture.prepareApplication(
+                    processIdentifier: application.processIdentifier
+                )
             }
         }
 
@@ -82,27 +88,22 @@ final class SelectionMonitor {
         let sourceName = sourceApplication.localizedName
         let sourcePID = sourceApplication.processIdentifier
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
+        selectionCapture.capture(in: sourcePID) { [weak self] selectedText in
             guard let self, generation == self.captureGeneration else { return }
+            guard NSWorkspace.shared.frontmostApplication?.processIdentifier == sourcePID else { return }
 
-            self.selectionCapture.capture { [weak self] selectedText in
-                guard let self, generation == self.captureGeneration else { return }
-                guard NSWorkspace.shared.frontmostApplication?.processIdentifier == sourcePID else { return }
-
-                let text = selectedText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                guard !text.isEmpty else {
-                    self.onSelectionCleared?()
-                    return
-                }
-
-                self.onSelection?(
-                    CapturedSelection(
-                        text: text,
-                        sourceApplication: sourceName,
-                        screenPoint: point
-                    )
-                )
+            guard Self.hasMeaningfulSelection(selectedText) else {
+                self.onSelectionCleared?()
+                return
             }
+            let text = selectedText!.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.onSelection?(
+                CapturedSelection(
+                    text: text,
+                    sourceApplication: sourceName,
+                    screenPoint: point
+                )
+            )
         }
     }
 
@@ -120,5 +121,10 @@ final class SelectionMonitor {
         }
         guard let mouseDown else { return false }
         return hypot(mouseUp.x - mouseDown.x, mouseUp.y - mouseDown.y) >= 4
+    }
+
+    static func hasMeaningfulSelection(_ selectedText: String?) -> Bool {
+        guard let selectedText else { return false }
+        return !selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }

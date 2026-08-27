@@ -1,0 +1,33 @@
+:root { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; color: #18181b; background: #f4f4f5; }
+main { width: min(720px, calc(100% - 32px)); margin: 48px auto; }
+header { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; }
+header img { border-radius: 15px; box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+h1 { margin: 0; font-size: 28px; }
+header p { margin: 4px 0 0; color: #71717a; }
+section { margin: 14px 0; border: 1px solid #e4e4e7; border-radius: 14px; padding: 20px; background: #fff; }
+h2 { margin: 0 0 8px; font-size: 18px; }
+p { color: #52525b; line-height: 1.55; }
+.file-row { display: flex; align-items: center; gap: 10px; margin: 16px 0; border-radius: 10px; padding: 12px; background: #f4f4f5; }
+#file-name { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 650; }
+.badge { border-radius: 999px; padding: 3px 8px; color: #52525b; background: #e4e4e7; font-size: 12px; }
+.badge[data-state="granted"] { color: #166534; background: #dcfce7; }
+.badge[data-state="denied"] { color: #991b1b; background: #fee2e2; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+button { border: 1px solid #d4d4d8; border-radius: 9px; padding: 8px 12px; color: #27272a; background: #fff; cursor: pointer; font-weight: 650; }
+button:hover { background: #f4f4f5; }
+button.primary { border-color: #18181b; color: #fff; background: #18181b; }
+button.danger { color: #b91c1c; }
+.hint { margin-bottom: 0; font-size: 12px; }
+.hidden { display: none !important; }
+.message { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); border-radius: 10px; padding: 10px 14px; color: #fff; background: #18181b; box-shadow: 0 10px 30px rgba(0,0,0,.24); }
+.message.error { background: #991b1b; }
+@media (prefers-color-scheme: dark) {
+  body { color: #f4f4f5; background: #09090b; }
+  section { border-color: #3f3f46; background: #18181b; }
+  p, header p { color: #a1a1aa; }
+  .file-row { background: #27272a; }
+  button { border-color: #52525b; color: #f4f4f5; background: #27272a; }
+  button.primary { border-color: #f4f4f5; color: #18181b; background: #f4f4f5; }
+}

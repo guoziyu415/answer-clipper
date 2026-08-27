@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "answer-clipper": {
+      "cwd": ".",
+      "command": "npm",
+      "args": ["run", "start"]
+    }
+  }
+}
