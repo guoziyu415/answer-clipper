@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  language-and-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            chrome-extension/package-lock.json
+            plugins/answer-clipper/package-lock.json
+      - run: node scripts/check-english.mjs
+      - run: npm ci
+        working-directory: chrome-extension
+      - run: npm test
+        working-directory: chrome-extension
+      - run: npx playwright install --with-deps chromium
+        working-directory: chrome-extension
+      - run: npm run test:e2e
+        working-directory: chrome-extension
+      - run: npm ci
+        working-directory: plugins/answer-clipper
+      - run: npm test
+        working-directory: plugins/answer-clipper
+      - run: npm run build
+        working-directory: plugins/answer-clipper
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+      - run: ./scripts/build-app.sh
+      - run: file "build/Answer Clipper.app/Contents/MacOS/AnswerClipper" | grep -q "universal binary"

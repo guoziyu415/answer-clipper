@@ -1,12 +1,19 @@
 {
   "manifest_version": 3,
-  "name": "Answer Clipper - Annotate ChatGPT Answers",
-  "version": "0.1.0",
-  "description": "Select parts of ChatGPT answers, add annotations, and save them to a local Markdown file.",
+  "name": "Answer Clipper - Web Highlights & Notes",
+  "version": "0.6.0",
+  "minimum_chrome_version": "109",
+  "description": "Highlight web text, add annotations, and save to Google Docs, Markdown, plain text, or a local inbox.",
   "permissions": [
     "downloads",
-    "storage"
+    "storage",
+    "identity"
   ],
+  "oauth2": {
+    "client_id": "664499921933-uqk0om0t4hb0ps9b95pu9g76l8p8pngo.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/documents"]
+  },
+  "host_permissions": ["https://docs.googleapis.com/*"],
   "background": {
     "service_worker": "background.js"
   },
@@ -18,8 +25,9 @@
   "content_scripts": [
     {
       "matches": [
-        "https://chatgpt.com/*",
-        "https://chat.openai.com/*"
+        "http://*/*",
+        "https://*/*",
+        "file:///*"
       ],
       "js": [
         "content.js"

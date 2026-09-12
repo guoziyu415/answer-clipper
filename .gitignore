@@ -5,5 +5,7 @@ build/
 *.xcodeproj/xcuserdata/
 DerivedData/
 dist/
+*.crx
+*.pem
 node_modules/
 plugins/answer-clipper/data/*.json

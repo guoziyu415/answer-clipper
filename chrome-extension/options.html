@@ -1,45 +1,102 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Answer Clipper 设置</title>
+  <title>Answer Clipper Settings</title>
   <link rel="stylesheet" href="settings.css">
 </head>
 <body>
   <main>
     <header>
       <img src="icons/icon-128.png" width="64" height="64" alt="">
-      <div><h1>Answer Clipper</h1><p>默认 Markdown 文件与隐私设置</p></div>
+      <div><h1>Answer Clipper</h1><p>Save destinations and privacy settings</p></div>
     </header>
 
     <section>
-      <h2>默认保存文件</h2>
-      <p>连接后，在 ChatGPT 页面点击“保存”即可把批注持续追加到这个文件。</p>
+      <h2>Default Save Destination</h2>
+      <label for="save-destination">Start new annotations with</label>
+      <select id="save-destination">
+        <option value="markdown">Markdown (.md)</option>
+        <option value="txt">Plain text (.txt)</option>
+        <option value="google">Google Docs</option>
+        <option value="inbox">Local inbox (export later)</option>
+      </select>
+      <p>Every annotation has its own <strong>Save to</strong> selector and one <strong>Save</strong> button. The last destination you save to becomes the default. A local backup is always kept.</p>
+    </section>
+
+    <section id="local-files">
+      <h2>Reusable Local Files</h2>
+      <p>Optional: choose a file to append notes to. Without one, saving Markdown or TXT asks for a filename and location each time.</p>
+      <label for="file-format">File format</label>
+      <select id="file-format">
+        <option value="markdown">Markdown (.md)</option>
+        <option value="txt">Plain text (.txt)</option>
+      </select>
       <div class="file-row">
-        <span id="file-name">尚未连接文件</span>
-        <span id="permission" class="badge">未设置</span>
+        <span id="file-name">No file connected</span>
+        <span id="permission" class="badge">Not configured</span>
       </div>
       <div class="actions">
-        <button id="choose" class="primary">选择或新建 MD 文件…</button>
-        <button id="authorize" class="hidden">重新授权</button>
-        <button id="disconnect" class="danger hidden">断开文件</button>
+        <button id="choose" class="primary">Choose or Create File…</button>
+        <button id="authorize" class="hidden">Reauthorize</button>
+        <button id="disconnect" class="danger hidden">Disconnect File</button>
       </div>
-      <p class="hint">Chrome 只会获得你主动选择的这一个文件的读写权限。文件权限失效时，批注仍会保存在插件本地收件箱。</p>
+      <p class="hint">Chrome receives read and write access only to the file you select. If permission expires, new annotations remain safely in the local inbox.</p>
     </section>
 
     <section>
-      <h2>本地收件箱</h2>
-      <p>当前保存了 <strong id="count">0</strong> 条批注。它们仅存放在这台浏览器中。</p>
-      <button id="export">导出全部为 MD…</button>
+      <h2>Local Inbox</h2>
+      <p><strong id="count">0</strong> annotations are backed up in this browser.</p>
+      <label for="export-format">Export format</label>
+      <select id="export-format">
+        <option value="markdown">Markdown (.md)</option>
+        <option value="txt">Plain text (.txt)</option>
+      </select>
+      <div class="actions">
+        <button id="export">Export Inbox…</button>
+        <button id="clear" class="danger">Clear Local Inbox…</button>
+      </div>
     </section>
 
     <section>
-      <h2>隐私</h2>
-      <p>Answer Clipper 不调用模型、不发送网络请求，也不把选中文字上传到服务器。数据只保存在浏览器本地或你选择的 Markdown 文件中。</p>
+      <details id="google-panel" open>
+        <summary>Google Docs <span class="badge" id="google-status">Not connected</span></summary>
+        <p>Connect Google and choose a document to append annotations. Your local inbox is always kept.</p>
+        <p class="hint">Google's Docs permission allows access to your Google documents. Answer Clipper only reads or updates the document you choose and only creates a document when you ask.</p>
+        <div id="google-setup" class="hidden">
+          <p>This build needs a Google OAuth client ID before it can connect. <a href="google-setup.html" target="_blank" rel="noopener">Setup instructions</a></p>
+        </div>
+        <div class="actions">
+          <button id="google-connect">Connect Google</button>
+          <button id="google-disconnect" class="danger hidden">Disconnect Google</button>
+        </div>
+        <div id="google-controls" class="hidden">
+          <label for="google-link">Existing Google Docs link</label>
+          <input id="google-link" type="url" placeholder="https://docs.google.com/document/d/…/edit" maxlength="2000">
+          <button id="google-select">Use This Document</button>
+          <label for="google-title">Or create a new document</label>
+          <input id="google-title" value="Answer Clipper Notes" maxlength="200">
+          <button id="google-create">Create Google Doc</button>
+        </div>
+        <div id="google-selected" class="file-row hidden">
+          <a id="google-document" target="_blank" rel="noopener"></a>
+          <span id="google-tab" class="badge"></span>
+        </div>
+        <div class="actions">
+          <button id="google-export" disabled>Export Inbox to Google Docs</button>
+        </div>
+        <p class="hint">Export appends clips not already sent to this document tab. To save an individual annotation here, choose Google Docs in its Save to selector. Disconnecting does not delete your document.</p>
+      </details>
+    </section>
+
+    <section>
+      <h2>Privacy</h2>
+      <p>Local saves stay on your device. Google Docs is optional: when you choose it, annotations and their source details are sent directly to Google. Answer Clipper has no server, analytics, or AI calls.</p>
     </section>
     <div id="message" class="message hidden" role="status"></div>
   </main>
+  <script src="lib/database.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

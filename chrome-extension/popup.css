@@ -10,6 +10,9 @@ header span { color: #71717a; font-size: 11px; }
 .stat strong { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 button { width: 100%; margin-top: 8px; border: 1px solid #d4d4d8; border-radius: 8px; padding: 8px; color: #27272a; background: #fff; cursor: pointer; font-weight: 650; }
 button.primary { border-color: #18181b; color: #fff; background: #18181b; }
+button.danger { color: #b91c1c; }
+label { display: block; margin-top: 12px; font-size: 12px; }
+select { width: 100%; margin-top: 6px; border: 1px solid #d4d4d8; border-radius: 8px; padding: 8px; font: inherit; color: inherit; background: transparent; }
 #message { min-height: 16px; margin: 9px 0 0; color: #52525b; font-size: 11px; text-align: center; }
 @media (prefers-color-scheme: dark) {
   body { color: #f4f4f5; background: #18181b; }

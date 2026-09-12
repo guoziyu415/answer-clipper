@@ -20,7 +20,7 @@ final class SelectionBubbleController: NSObject {
         background.layer?.cornerRadius = 10
         background.layer?.masksToBounds = true
 
-        let button = NSButton(title: "批注", target: self, action: #selector(annotate))
+        let button = NSButton(title: "Annotate", target: self, action: #selector(annotate))
         button.image = NSImage(systemSymbolName: "square.and.pencil", accessibilityDescription: nil)
         button.imagePosition = .imageLeading
         button.bezelStyle = .rounded

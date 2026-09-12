@@ -20,6 +20,14 @@ button:hover { background: #f4f4f5; }
 button.primary { border-color: #18181b; color: #fff; background: #18181b; }
 button.danger { color: #b91c1c; }
 .hint { margin-bottom: 0; font-size: 12px; }
+label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 7px; }
+input, select { display: block; width: 100%; padding: 10px 12px; margin: 0 0 10px; border: 1px solid #d4d4d8; border-radius: 9px; font: inherit; color: inherit; background: transparent; }
+summary { cursor: pointer; font-size: 18px; font-weight: 650; }
+summary .badge { margin-left: 8px; font-weight: 400; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+a { color: #2563eb; overflow-wrap: anywhere; }
+#google-document { flex: 1; min-width: 0; }
+#google-setup { border-left: 3px solid #eab308; padding-left: 12px; }
 .hidden { display: none !important; }
 .message { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); border-radius: 10px; padding: 10px 14px; color: #fff; background: #18181b; box-shadow: 0 10px 30px rgba(0,0,0,.24); }
 .message.error { background: #991b1b; }

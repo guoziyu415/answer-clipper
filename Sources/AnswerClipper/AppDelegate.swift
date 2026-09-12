@@ -50,19 +50,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
 
         let menu = NSMenu()
-        menu.addItem(withTitle: "批注选中文字  ⌥⌘A", action: #selector(annotateSelection), keyEquivalent: "")
-        menu.addItem(withTitle: "快速保存  ⌥⌘S", action: #selector(quickSaveSelection), keyEquivalent: "")
+        menu.addItem(withTitle: "Annotate Selection  ⌥⌘A", action: #selector(annotateSelection), keyEquivalent: "")
+        menu.addItem(withTitle: "Quick Save  ⌥⌘S", action: #selector(quickSaveSelection), keyEquivalent: "")
         menu.addItem(.separator())
-        menu.addItem(withTitle: "打开 Markdown 笔记", action: #selector(openNote), keyEquivalent: "")
+        menu.addItem(withTitle: "Open Markdown Note", action: #selector(openNote), keyEquivalent: "")
         let locationItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
         locationItem.isEnabled = false
         menu.addItem(locationItem)
         currentLocationMenuItem = locationItem
-        menu.addItem(withTitle: "更改默认保存文件…", action: #selector(chooseNoteFile), keyEquivalent: "")
-        menu.addItem(withTitle: "恢复默认保存位置", action: #selector(resetNoteFile), keyEquivalent: "")
+        menu.addItem(withTitle: "Change Default File…", action: #selector(chooseNoteFile), keyEquivalent: "")
+        menu.addItem(withTitle: "Restore Default Location", action: #selector(resetNoteFile), keyEquivalent: "")
         menu.addItem(.separator())
-        menu.addItem(withTitle: "辅助功能权限…", action: #selector(requestAccessibility), keyEquivalent: "")
-        menu.addItem(withTitle: "退出 Answer Clipper", action: #selector(quit), keyEquivalent: "q")
+        menu.addItem(withTitle: "Accessibility Permission…", action: #selector(requestAccessibility), keyEquivalent: "")
+        menu.addItem(withTitle: "Quit Answer Clipper", action: #selector(quit), keyEquivalent: "q")
 
         for menuItem in menu.items {
             menuItem.target = self
@@ -96,7 +96,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         guard selectionCapture.isAccessibilityTrusted else {
             selectionCapture.requestAccessibilityPermission()
-            toast.show("请先授予辅助功能权限")
+            toast.show("Grant Accessibility permission first")
             return
         }
 
@@ -105,7 +105,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         selectionCapture.capture(in: sourceApplication.processIdentifier) { [weak self] selectedText in
             guard let self else { return }
             guard let selectedText, !selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                self.toast.show("没有读取到选中文字")
+                self.toast.show("No selected text was found")
                 return
             }
 
@@ -125,7 +125,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         createdAt: Date()
                     )
                     try self.noteStore.append(clip)
-                    self.toast.show("已保存到 Markdown")
+                    self.toast.show("Saved to Markdown")
                 } catch {
                     self.showError(error)
                 }
@@ -161,7 +161,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     try self.noteStore.append(request.clip, to: request.destinationURL)
                     self.annotationPanel?.close()
                     self.annotationPanel = nil
-                    self.toast.show("批注已保存")
+                    self.toast.show("Annotation saved")
                 } catch {
                     self.showError(error)
                 }
@@ -191,7 +191,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updateLocationMenuItem()
         do {
             try noteStore.ensureFileExists()
-            toast.show("已更改默认保存位置")
+            toast.show("Default save location changed")
         } catch {
             showError(error)
         }
@@ -200,12 +200,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func resetNoteFile() {
         noteStore.resetNoteURL()
         updateLocationMenuItem()
-        toast.show("已恢复默认保存位置")
+        toast.show("Default save location restored")
     }
 
     private func pickNoteURL(startingAt currentURL: URL) -> URL? {
         let panel = NSSavePanel()
-        panel.title = "选择 Markdown 笔记"
+        panel.title = "Choose a Markdown Note"
         panel.nameFieldStringValue = currentURL.lastPathComponent
         panel.directoryURL = currentURL.deletingLastPathComponent()
         panel.allowedContentTypes = [.init(filenameExtension: "md")!]
@@ -217,7 +217,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func updateLocationMenuItem() {
-        currentLocationMenuItem?.title = "默认保存到：\(abbreviatedPath(noteStore.noteURL))"
+        currentLocationMenuItem?.title = "Default destination: \(abbreviatedPath(noteStore.noteURL))"
     }
 
     private func abbreviatedPath(_ url: URL) -> String {
@@ -239,9 +239,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showError(_ error: Error) {
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = "保存失败"
+        alert.messageText = "Save Failed"
         alert.informativeText = error.localizedDescription
-        alert.addButton(withTitle: "好")
+        alert.addButton(withTitle: "OK")
         NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
     }

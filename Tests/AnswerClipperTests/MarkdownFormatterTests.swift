@@ -5,25 +5,25 @@ import XCTest
 final class MarkdownFormatterTests: XCTestCase {
     func testEntryKeepsQuoteAndAnnotationSeparate() {
         let clip = Clip(
-            quote: "第一行\n第二行",
-            annotation: "这是我的理解",
+            quote: "First line\nSecond line",
+            annotation: "My takeaway",
             kind: .thought,
-            tags: ["#插件", "#想法"],
+            tags: ["#plugin", "#idea"],
             sourceApplication: "Codex",
             createdAt: Date(timeIntervalSince1970: 0)
         )
 
         let markdown = MarkdownFormatter.entry(for: clip)
 
-        XCTAssertTrue(markdown.contains("> 第一行\n> 第二行"))
-        XCTAssertTrue(markdown.contains("**批注：**  \n这是我的理解"))
-        XCTAssertTrue(markdown.contains("**标签：** #插件 #想法"))
-        XCTAssertTrue(markdown.contains("**来源：** Codex"))
+        XCTAssertTrue(markdown.contains("> First line\n> Second line"))
+        XCTAssertTrue(markdown.contains("**Annotation:**  \nMy takeaway"))
+        XCTAssertTrue(markdown.contains("**Tags:** #plugin #idea"))
+        XCTAssertTrue(markdown.contains("**Source:** Codex"))
     }
 
     func testEntryOmitsEmptyAnnotationAndTags() {
         let clip = Clip(
-            quote: "只保存原文",
+            quote: "Save only the quote",
             annotation: "",
             kind: .highlight,
             tags: [],
@@ -33,9 +33,9 @@ final class MarkdownFormatterTests: XCTestCase {
 
         let markdown = MarkdownFormatter.entry(for: clip)
 
-        XCTAssertFalse(markdown.contains("**批注：**"))
-        XCTAssertFalse(markdown.contains("**标签：**"))
-        XCTAssertTrue(markdown.contains("**类型：** 重点"))
+        XCTAssertFalse(markdown.contains("**Annotation:**"))
+        XCTAssertFalse(markdown.contains("**Tags:**"))
+        XCTAssertTrue(markdown.contains("**Category:** Highlight"))
     }
 
     func testNoteStoreCanResetCustomDefaultLocation() {

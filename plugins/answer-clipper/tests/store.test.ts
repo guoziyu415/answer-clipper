@@ -8,8 +8,10 @@ import { DraftStore } from "../server/store.js";
 
 function temporaryStore() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "answer-clipper-test-"));
+  const file = path.join(directory, "draft.json");
   return {
-    store: new DraftStore(path.join(directory, "draft.json")),
+    file,
+    store: new DraftStore(file),
     cleanup: () => fs.rmSync(directory, { recursive: true, force: true }),
   };
 }
@@ -55,8 +57,8 @@ test("exports Markdown and text with annotations", () => {
     const markdown = renderMarkdown(draft);
     assert.match(markdown, /^# My \/ Notes/m);
     assert.match(markdown, /> Line one\n> Line two/);
-    assert.match(markdown, /\*\*批注：\*\* Keep this/);
-    assert.match(renderText(draft), /批注：Keep this/);
+    assert.match(markdown, /\*\*Annotation:\*\* Keep this/);
+    assert.match(renderText(draft), /Annotation: Keep this/);
     assert.equal(exportDraft(draft, "md").filename, "My - Notes.md");
     assert.equal(exportDraft(draft, "txt").mimeType, "text/plain;charset=utf-8");
   } finally {
@@ -71,6 +73,17 @@ test("clear keeps the draft usable", () => {
     const draft = store.clear();
     assert.equal(draft.clips.length, 0);
     assert.equal(store.read().clips.length, 0);
+  } finally {
+    cleanup();
+  }
+});
+
+test("does not overwrite an unreadable draft", () => {
+  const { file, store, cleanup } = temporaryStore();
+  try {
+    fs.writeFileSync(file, "{not valid json", "utf8");
+    assert.throws(() => store.read(), /left unchanged/);
+    assert.equal(fs.readFileSync(file, "utf8"), "{not valid json");
   } finally {
     cleanup();
   }

@@ -82,45 +82,49 @@ function ClipCard({
     <article className="clip-card">
       <div className="clip-number">{String(index + 1).padStart(2, "0")}</div>
       <div className="clip-body">
-        <label className="field-label" htmlFor={`quote-${clip.id}`}>摘录</label>
+        <label className="field-label" htmlFor={`quote-${clip.id}`}>Excerpt</label>
         <textarea
           id={`quote-${clip.id}`}
           className="quote-input"
           value={quote}
           onChange={(event) => setQuote(event.target.value)}
-          onBlur={save}
+          onBlur={() => { void save(); }}
+          maxLength={50_000}
           rows={3}
         />
-        <label className="field-label annotation-label" htmlFor={`note-${clip.id}`}>我的批注</label>
+        <label className="field-label annotation-label" htmlFor={`note-${clip.id}`}>My Annotation</label>
         <textarea
           id={`note-${clip.id}`}
           value={annotation}
           onChange={(event) => setAnnotation(event.target.value)}
-          onBlur={save}
-          placeholder="写下疑问、理解或下一步……"
+          onBlur={() => { void save(); }}
+          maxLength={20_000}
+          placeholder="Add a question, interpretation, or next step…"
           rows={2}
         />
         <div className="metadata-row">
           <input
-            aria-label="标签"
+            aria-label="Tags"
             value={tags}
             onChange={(event) => setTags(event.target.value)}
-            onBlur={save}
-            placeholder="标签，用空格分隔"
+            onBlur={() => { void save(); }}
+            maxLength={3_000}
+            placeholder="Tags separated by spaces"
           />
           <input
-            aria-label="来源"
+            aria-label="Source"
             value={source}
             onChange={(event) => setSource(event.target.value)}
-            onBlur={save}
-            placeholder="来源（可选）"
+            onBlur={() => { void save(); }}
+            maxLength={1_000}
+            placeholder="Source (optional)"
           />
         </div>
       </div>
-      <div className="clip-actions" aria-label="摘录操作">
-        <button className="icon-button" disabled={index === 0} onClick={() => onMove(clip.id, index - 1)} aria-label="上移">↑</button>
-        <button className="icon-button" disabled={index === count - 1} onClick={() => onMove(clip.id, index + 1)} aria-label="下移">↓</button>
-        <button className="icon-button danger" onClick={() => onDelete(clip.id)} aria-label="删除">×</button>
+      <div className="clip-actions" aria-label="Excerpt actions">
+        <button className="icon-button" disabled={index === 0} onClick={() => onMove(clip.id, index - 1)} aria-label="Move up">↑</button>
+        <button className="icon-button" disabled={index === count - 1} onClick={() => onMove(clip.id, index + 1)} aria-label="Move down">↓</button>
+        <button className="icon-button danger" onClick={() => onDelete(clip.id)} aria-label="Delete">×</button>
       </div>
     </article>
   );
@@ -145,7 +149,7 @@ export default function App() {
   }, []);
 
   const { app, error } = useApp({
-    appInfo: { name: "Answer Clipper", version: "0.1.0" },
+    appInfo: { name: "Answer Clipper", version: "0.2.0" },
     capabilities: {},
     onAppCreated: (createdApp: McpApp) => {
       createdApp.ontoolresult = (result) => acceptDraft(getDraft(result));
@@ -173,7 +177,7 @@ export default function App() {
       headers: route.body ? { "Content-Type": "application/json" } : undefined,
       body: route.body ? JSON.stringify(route.body) : undefined,
     });
-    if (!response.ok) throw new Error((await response.json()).error ?? "请求失败");
+    if (!response.ok) throw new Error((await response.json()).error ?? "Request failed");
     return (await response.json()) as { draft: DraftState };
   }, []);
 
@@ -183,7 +187,7 @@ export default function App() {
     try {
       if (!IS_STANDALONE_PREVIEW && hostApp.current) {
         const result = await hostApp.current.callServerTool({ name, arguments: args });
-        if (result.isError) throw new Error("保存失败，请重试。");
+        if (result.isError) throw new Error("Save failed. Try again.");
         acceptDraft(getDraft(result));
         return result;
       }
@@ -192,8 +196,8 @@ export default function App() {
       return result;
     } catch (callError) {
       setStatus("error");
-      setErrorMessage(callError instanceof Error ? callError.message : "操作失败");
-      throw callError;
+      setErrorMessage(callError instanceof Error ? callError.message : "The operation failed");
+      return null;
     }
   }, [acceptDraft, restCall]);
 
@@ -208,13 +212,14 @@ export default function App() {
 
   const addClip = async () => {
     if (!quote.trim()) return;
-    await call("draft_append", {
+    const result = await call("draft_append", {
       id: crypto.randomUUID(),
       quote,
       annotation,
       tags: splitTags(tags),
       source,
     });
+    if (!result) return;
     setQuote("");
     setAnnotation("");
     setTags("");
@@ -230,12 +235,12 @@ export default function App() {
       setStatus("saving");
       const result = await hostApp.current.callServerTool({ name: "draft_export", arguments: { format } });
       const exported = (result.structuredContent as unknown as { export?: ExportResult })?.export;
-      if (!exported) throw new Error("没有收到导出文件。");
+      if (!exported) throw new Error("No export file was returned.");
       downloadFile(exported);
       setStatus("saved");
     } catch (exportError) {
       setStatus("error");
-      setErrorMessage(exportError instanceof Error ? exportError.message : "导出失败");
+      setErrorMessage(exportError instanceof Error ? exportError.message : "Export failed");
     }
   };
 
@@ -243,7 +248,7 @@ export default function App() {
     return (
       <main className="workspace loading-state">
         <div className="brand-mark">A</div>
-        <p>{error ? "正在切换到本地预览……" : "正在打开摘录工作区……"}</p>
+        <p>{error ? "Switching to the local preview…" : "Opening the clipping workspace…"}</p>
         {status === "error" && <p className="error-message">{errorMessage}</p>}
       </main>
     );
@@ -259,35 +264,36 @@ export default function App() {
             value={draft.title}
             onChange={(event) => setDraft({ ...draft, title: event.target.value })}
             onBlur={() => void call("draft_set_title", { title: draft.title })}
-            aria-label="导出标题"
+            aria-label="Export title"
+            maxLength={200}
           />
         </div>
         <div className="header-meta">
-          <span>{draft.clips.length} 条摘录</span>
-          <span className={`save-status ${status}`}>{status === "saving" ? "保存中" : status === "error" ? "出错" : "已自动保存"}</span>
+          <span>{draft.clips.length} {draft.clips.length === 1 ? "excerpt" : "excerpts"}</span>
+          <span className={`save-status ${status}`}>{status === "saving" ? "Saving" : status === "error" ? "Error" : "Autosaved"}</span>
         </div>
       </header>
 
       <section className="composer">
-        <textarea value={quote} onChange={(event) => setQuote(event.target.value)} placeholder="粘贴或输入想保留的回答片段……" rows={3} />
-        <textarea value={annotation} onChange={(event) => setAnnotation(event.target.value)} placeholder="添加批注（可稍后填写）" rows={2} />
+        <textarea value={quote} onChange={(event) => setQuote(event.target.value)} placeholder="Paste or type an answer excerpt to keep…" maxLength={50_000} rows={3} />
+        <textarea value={annotation} onChange={(event) => setAnnotation(event.target.value)} placeholder="Add an annotation (optional)" maxLength={20_000} rows={2} />
         <div className="composer-footer">
           <div className="compact-fields">
-            <input value={tags} onChange={(event) => setTags(event.target.value)} placeholder="标签" aria-label="新摘录标签" />
-            <input value={source} onChange={(event) => setSource(event.target.value)} placeholder="来源" aria-label="新摘录来源" />
+            <input value={tags} onChange={(event) => setTags(event.target.value)} placeholder="Tags" aria-label="New excerpt tags" maxLength={3_000} />
+            <input value={source} onChange={(event) => setSource(event.target.value)} placeholder="Source" aria-label="New excerpt source" maxLength={1_000} />
           </div>
-          <button className="primary-button" disabled={!quote.trim() || status === "saving"} onClick={() => void addClip()}>加入草稿</button>
+          <button className="primary-button" disabled={!quote.trim() || status === "saving"} onClick={() => void addClip()}>Add to Draft</button>
         </div>
       </section>
 
       {errorMessage && <div className="error-banner">{errorMessage}</div>}
 
-      <section className="clip-list" aria-label="已保存摘录">
+      <section className="clip-list" aria-label="Saved excerpts">
         {draft.clips.length === 0 ? (
           <div className="empty-state">
             <div className="empty-glyph">“</div>
-            <p>还没有摘录</p>
-            <span>把第一段有用的回答放到上方。</span>
+            <p>No excerpts yet</p>
+            <span>Add the first useful answer excerpt above.</span>
           </div>
         ) : draft.clips.map((clip, index) => (
           <ClipCard
@@ -304,17 +310,17 @@ export default function App() {
 
       <footer className="workspace-footer">
         <div className="export-actions">
-          <span>导出</span>
+          <span>Export</span>
           <button onClick={() => void exportFile("md")}>Markdown</button>
           <button onClick={() => void exportFile("txt")}>TXT</button>
         </div>
         {draft.clips.length > 0 && (
           clearArmed ? (
             <div className="clear-confirm">
-              <button onClick={() => setClearArmed(false)}>取消</button>
-              <button className="danger-text" onClick={() => { void call("draft_clear"); setClearArmed(false); }}>确认清空</button>
+              <button onClick={() => setClearArmed(false)}>Cancel</button>
+              <button className="danger-text" onClick={() => { void call("draft_clear"); setClearArmed(false); }}>Confirm Clear</button>
             </div>
-          ) : <button className="quiet-button" onClick={() => setClearArmed(true)}>清空草稿</button>
+          ) : <button className="quiet-button" onClick={() => setClearArmed(true)}>Clear Draft</button>
         )}
       </footer>
     </main>

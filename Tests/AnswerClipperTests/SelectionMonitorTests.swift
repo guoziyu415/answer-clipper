@@ -10,7 +10,7 @@ final class SelectionMonitorTests: XCTestCase {
     }
 
     func testRealTextSelectionPresentsBubble() {
-        XCTAssertTrue(SelectionMonitor.hasMeaningfulSelection("选中的文字"))
+        XCTAssertTrue(SelectionMonitor.hasMeaningfulSelection("Selected text"))
     }
 
     func testDragTriggersSelectionInspection() {
@@ -39,6 +39,38 @@ final class SelectionMonitorTests: XCTestCase {
                 mouseDown: NSPoint(x: 10, y: 10),
                 mouseUp: NSPoint(x: 11, y: 11),
                 clickCount: 1
+            )
+        )
+    }
+
+    func testUnchangedDragSelectionIsIgnored() {
+        let selection = SelectionSnapshot(text: "Existing selection", fingerprint: "same-range")
+        XCTAssertFalse(
+            SelectionMonitor.representsNewSelection(
+                before: selection,
+                after: selection,
+                clickCount: 1
+            )
+        )
+    }
+
+    func testChangedDragSelectionIsAccepted() {
+        XCTAssertTrue(
+            SelectionMonitor.representsNewSelection(
+                before: SelectionSnapshot(text: "Old", fingerprint: "old-range"),
+                after: SelectionSnapshot(text: "New", fingerprint: "new-range"),
+                clickCount: 1
+            )
+        )
+    }
+
+    func testDoubleClickCanReuseTheSameSelection() {
+        let selection = SelectionSnapshot(text: "Word", fingerprint: "same-range")
+        XCTAssertTrue(
+            SelectionMonitor.representsNewSelection(
+                before: selection,
+                after: selection,
+                clickCount: 2
             )
         )
     }

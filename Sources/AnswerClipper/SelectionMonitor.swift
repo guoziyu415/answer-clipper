@@ -15,6 +15,9 @@ final class SelectionMonitor {
     private var mouseUpMonitor: Any?
     private var dismissMonitor: Any?
     private var mouseDownPoint: NSPoint?
+    private var mouseDownSelection: SelectionSnapshot?
+    private var mouseDownProcessIdentifier: pid_t?
+    private var mouseDownGeneration = 0
     private var captureGeneration = 0
 
     init(selectionCapture: SelectionCapture) {
@@ -26,13 +29,26 @@ final class SelectionMonitor {
 
         mouseDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { [weak self] _ in
             DispatchQueue.main.async {
-                self?.mouseDownPoint = NSEvent.mouseLocation
+                guard let self else { return }
+                self.invalidateCapture()
+                self.clearMouseDownSnapshot()
+                self.mouseDownPoint = NSEvent.mouseLocation
                 guard let application = NSWorkspace.shared.frontmostApplication,
                       application.processIdentifier != ProcessInfo.processInfo.processIdentifier
                 else { return }
-                self?.selectionCapture.prepareApplication(
-                    processIdentifier: application.processIdentifier
-                )
+                let processIdentifier = application.processIdentifier
+                self.mouseDownProcessIdentifier = processIdentifier
+                let generation = self.mouseDownGeneration
+                self.selectionCapture.captureSnapshot(
+                    in: processIdentifier,
+                    delay: 0
+                ) { [weak self] snapshot in
+                    guard let self,
+                          generation == self.mouseDownGeneration,
+                          processIdentifier == self.mouseDownProcessIdentifier
+                    else { return }
+                    self.mouseDownSelection = snapshot
+                }
             }
         }
 
@@ -49,6 +65,7 @@ final class SelectionMonitor {
         ) { [weak self] _ in
             DispatchQueue.main.async {
                 self?.invalidateCapture()
+                self?.clearMouseDownSnapshot()
                 self?.onSelectionCleared?()
             }
         }
@@ -64,6 +81,7 @@ final class SelectionMonitor {
         mouseUpMonitor = nil
         dismissMonitor = nil
         invalidateCapture()
+        clearMouseDownSnapshot()
     }
 
     private func handleMouseUp(at point: NSPoint, clickCount: Int) {
@@ -76,27 +94,47 @@ final class SelectionMonitor {
 
         guard shouldInspect else {
             invalidateCapture()
+            clearMouseDownSnapshot()
             onSelectionCleared?()
             return
         }
-        guard selectionCapture.isAccessibilityTrusted else { return }
-        guard let sourceApplication = NSWorkspace.shared.frontmostApplication else { return }
-        guard sourceApplication.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }
+        guard selectionCapture.isAccessibilityTrusted else {
+            clearMouseDownSnapshot()
+            return
+        }
+        guard let sourceApplication = NSWorkspace.shared.frontmostApplication else {
+            clearMouseDownSnapshot()
+            return
+        }
+        guard sourceApplication.processIdentifier != ProcessInfo.processInfo.processIdentifier else {
+            clearMouseDownSnapshot()
+            return
+        }
 
         captureGeneration += 1
         let generation = captureGeneration
         let sourceName = sourceApplication.localizedName
         let sourcePID = sourceApplication.processIdentifier
 
-        selectionCapture.capture(in: sourcePID) { [weak self] selectedText in
+        selectionCapture.captureSnapshot(in: sourcePID) { [weak self] selection in
             guard let self, generation == self.captureGeneration else { return }
+            defer {
+                self.clearMouseDownSnapshot()
+            }
             guard NSWorkspace.shared.frontmostApplication?.processIdentifier == sourcePID else { return }
 
-            guard Self.hasMeaningfulSelection(selectedText) else {
+            guard let selection,
+                  Self.hasMeaningfulSelection(selection.text),
+                  Self.representsNewSelection(
+                    before: self.mouseDownProcessIdentifier == sourcePID ? self.mouseDownSelection : nil,
+                    after: selection,
+                    clickCount: clickCount
+                  )
+            else {
                 self.onSelectionCleared?()
                 return
             }
-            let text = selectedText!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let text = selection.text.trimmingCharacters(in: .whitespacesAndNewlines)
             self.onSelection?(
                 CapturedSelection(
                     text: text,
@@ -109,6 +147,12 @@ final class SelectionMonitor {
 
     private func invalidateCapture() {
         captureGeneration += 1
+    }
+
+    private func clearMouseDownSnapshot() {
+        mouseDownGeneration += 1
+        mouseDownSelection = nil
+        mouseDownProcessIdentifier = nil
     }
 
     static func shouldInspectSelection(
@@ -126,5 +170,14 @@ final class SelectionMonitor {
     static func hasMeaningfulSelection(_ selectedText: String?) -> Bool {
         guard let selectedText else { return false }
         return !selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    static func representsNewSelection(
+        before: SelectionSnapshot?,
+        after: SelectionSnapshot,
+        clickCount: Int
+    ) -> Bool {
+        guard clickCount < 2, let before else { return true }
+        return before.fingerprint != after.fingerprint
     }
 }

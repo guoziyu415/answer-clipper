@@ -19,10 +19,10 @@ function quoteMarkdown(value: string): string {
 export function renderMarkdown(draft: DraftState): string {
   const sections = draft.clips.map((clip, index) => {
     const details = [
-      clip.annotation ? `**批注：** ${clip.annotation}` : "",
-      clip.tags.length > 0 ? `**标签：** ${clip.tags.map((tag) => `#${tag.replace(/^#/, "")}`).join(" ")}` : "",
-      clip.source ? `**来源：** ${clip.source}` : "",
-      `**时间：** ${clip.createdAt}`,
+      clip.annotation ? `**Annotation:** ${clip.annotation}` : "",
+      clip.tags.length > 0 ? `**Tags:** ${clip.tags.map((tag) => `#${tag.replace(/^#/, "")}`).join(" ")}` : "",
+      clip.source ? `**Source:** ${clip.source}` : "",
+      `**Time:** ${clip.createdAt}`,
     ].filter(Boolean);
 
     return [`## ${index + 1}`, quoteMarkdown(clip.quote), ...details].join("\n\n");
@@ -34,10 +34,10 @@ export function renderMarkdown(draft: DraftState): string {
 export function renderText(draft: DraftState): string {
   const sections = draft.clips.map((clip, index) => {
     const lines = [`${index + 1}. ${clip.quote}`];
-    if (clip.annotation) lines.push(`批注：${clip.annotation}`);
-    if (clip.tags.length > 0) lines.push(`标签：${clip.tags.join(", ")}`);
-    if (clip.source) lines.push(`来源：${clip.source}`);
-    lines.push(`时间：${clip.createdAt}`);
+    if (clip.annotation) lines.push(`Annotation: ${clip.annotation}`);
+    if (clip.tags.length > 0) lines.push(`Tags: ${clip.tags.join(", ")}`);
+    if (clip.source) lines.push(`Source: ${clip.source}`);
+    lines.push(`Time: ${clip.createdAt}`);
     return lines.join("\n");
   });
 

@@ -36,8 +36,9 @@ export class DraftStore {
         draftId: "default",
         clips: Array.isArray(parsed.clips) ? parsed.clips : [],
       };
-    } catch {
-      return emptyDraft();
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "Unknown parse error";
+      throw new Error(`The draft file could not be read. It was left unchanged. ${reason}`);
     }
   }
 
@@ -48,7 +49,7 @@ export class DraftStore {
   }
 
   append(input: ClipInput): DraftState {
-    if (!input.quote.trim()) throw new Error("摘录内容不能为空。");
+    if (!input.quote.trim()) throw new Error("The excerpt cannot be empty.");
     return this.mutate((draft) => {
       if (input.id && draft.clips.some((clip) => clip.id === input.id)) return;
       const timestamp = now();
@@ -68,7 +69,7 @@ export class DraftStore {
     return this.mutate((draft) => {
       const clip = this.requireClip(draft, id);
       if (changes.quote !== undefined) {
-        if (!changes.quote.trim()) throw new Error("摘录内容不能为空。");
+        if (!changes.quote.trim()) throw new Error("The excerpt cannot be empty.");
         clip.quote = changes.quote.trim();
       }
       if (changes.annotation !== undefined) clip.annotation = changes.annotation.trim();
@@ -81,7 +82,7 @@ export class DraftStore {
   remove(id: string): DraftState {
     return this.mutate((draft) => {
       const index = draft.clips.findIndex((clip) => clip.id === id);
-      if (index === -1) throw new Error("找不到这条摘录。");
+      if (index === -1) throw new Error("The excerpt could not be found.");
       draft.clips.splice(index, 1);
     });
   }
@@ -89,7 +90,7 @@ export class DraftStore {
   move(id: string, toIndex: number): DraftState {
     return this.mutate((draft) => {
       const fromIndex = draft.clips.findIndex((clip) => clip.id === id);
-      if (fromIndex === -1) throw new Error("找不到这条摘录。");
+      if (fromIndex === -1) throw new Error("The excerpt could not be found.");
       const boundedIndex = Math.max(0, Math.min(toIndex, draft.clips.length - 1));
       const [clip] = draft.clips.splice(fromIndex, 1);
       draft.clips.splice(boundedIndex, 0, clip);
@@ -104,7 +105,7 @@ export class DraftStore {
 
   private requireClip(draft: DraftState, id: string): Clip {
     const clip = draft.clips.find((candidate) => candidate.id === id);
-    if (!clip) throw new Error("找不到这条摘录。");
+    if (!clip) throw new Error("The excerpt could not be found.");
     return clip;
   }
 

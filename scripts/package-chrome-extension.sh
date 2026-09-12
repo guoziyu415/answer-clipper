@@ -14,6 +14,6 @@ rm -f "$ARCHIVE"
 cd "$EXTENSION_DIR"
 zip -qr "$ARCHIVE" \
   manifest.json background.js content.js options.html options.js settings.css \
-  popup.html popup.js popup.css lib icons/icon-16.png icons/icon-32.png icons/icon-48.png icons/icon-128.png
+  popup.html popup.js popup.css google-setup.html lib icons/icon-16.png icons/icon-32.png icons/icon-48.png icons/icon-128.png
 
 echo "Created $ARCHIVE"

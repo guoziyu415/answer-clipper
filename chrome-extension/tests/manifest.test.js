@@ -8,12 +8,15 @@ const path = require("node:path");
 const extensionRoot = path.resolve(__dirname, "..");
 const manifest = JSON.parse(fs.readFileSync(path.join(extensionRoot, "manifest.json"), "utf8"));
 
-test("uses Manifest V3 with narrow permissions", () => {
+test("supports web pages and limits Google API access to Docs", () => {
   assert.equal(manifest.manifest_version, 3);
-  assert.deepEqual(manifest.permissions.sort(), ["downloads", "storage"]);
+  assert.deepEqual(manifest.permissions.sort(), ["downloads", "identity", "storage"]);
+  assert.deepEqual(manifest.host_permissions, ["https://docs.googleapis.com/*"]);
+  if (manifest.oauth2) assert.deepEqual(manifest.oauth2.scopes, ["https://www.googleapis.com/auth/documents"]);
   assert.deepEqual(manifest.content_scripts[0].matches.sort(), [
-    "https://chat.openai.com/*",
-    "https://chatgpt.com/*"
+    "file:///*",
+    "http://*/*",
+    "https://*/*"
   ]);
 });
 

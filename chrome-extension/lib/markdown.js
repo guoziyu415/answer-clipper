@@ -1,23 +1,29 @@
 (function exposeMarkdown(root) {
   "use strict";
 
-  const KINDS = new Set(["想法", "问题", "待验证", "重点"]);
+  const KINDS = new Set(["Thought", "Question", "Verify", "Highlight"]);
+  const LEGACY_KINDS = new Map([
+    ["\u60F3\u6CD5", "Thought"],
+    ["\u95EE\u9898", "Question"],
+    ["\u5F85\u9A8C\u8BC1", "Verify"],
+    ["\u91CD\u70B9", "Highlight"]
+  ]);
 
   function normalizeClip(input) {
     if (!input || typeof input !== "object") {
-      throw new TypeError("批注内容无效");
+      throw new TypeError("The annotation is invalid");
     }
 
     const quote = cleanText(input.quote, 50_000);
     if (!quote) {
-      throw new TypeError("没有可保存的选中文字");
+      throw new TypeError("There is no selected text to save");
     }
 
     return {
       id: typeof input.id === "string" && input.id ? input.id : createId(),
       quote,
       annotation: cleanText(input.annotation, 20_000),
-      kind: KINDS.has(input.kind) ? input.kind : "想法",
+      kind: KINDS.has(input.kind) ? input.kind : LEGACY_KINDS.get(input.kind) || "Thought",
       tags: normalizeTags(input.tags),
       pageTitle: cleanText(input.pageTitle, 500),
       pageUrl: normalizeUrl(input.pageUrl),
@@ -26,36 +32,20 @@
   }
 
   function formatEntry(rawClip) {
-    const clip = normalizeClip(rawClip);
-    const title = firstMeaningfulLine(clip.annotation) || clip.kind;
-    const quote = clip.quote
+    const note = getNoteContent(rawClip);
+    const quote = note.quote
       .split(/\r?\n/)
       .map((line) => `> ${line}`)
       .join("\n");
 
-    const lines = [
-      `## ${escapeHeading(title).slice(0, 80)}`,
-      "",
-      quote,
-      ""
-    ];
-
-    if (clip.annotation) {
-      lines.push("**批注：**  ", clip.annotation, "");
+    const lines = [quote, ""];
+    if (note.annotation) lines.push(note.annotation, "");
+    if (note.source.label) {
+      const label = escapeLinkLabel(note.source.label);
+      const url = note.source.url.replace(/[<>\\]/g, (value) => encodeURIComponent(value));
+      lines.push(note.source.url ? `[${label}](<${url}>)` : label, "");
     }
-
-    lines.push(`**类型：** ${clip.kind}  `);
-    if (clip.tags.length) {
-      lines.push(`**标签：** ${clip.tags.join(" ")}  `);
-    }
-    if (clip.pageTitle) {
-      lines.push(`**来源：** ${clip.pageTitle}  `);
-    }
-    if (clip.pageUrl) {
-      lines.push(`**链接：** ${clip.pageUrl}  `);
-    }
-    lines.push(`**时间：** ${formatTimestamp(clip.createdAt)}`, "", "---", "", "");
-
+    lines.push("---", "", "");
     return lines.join("\n");
   }
 
@@ -64,11 +54,46 @@
     return `# Answer Clipper\n\n${entries}`;
   }
 
+  function formatTextEntry(rawClip) {
+    const note = getNoteContent(rawClip);
+    const lines = [`“${note.quote}”`, ""];
+    if (note.annotation) lines.push(note.annotation, "");
+    // TXT cannot hide a hyperlink behind a label. Keep only its short title;
+    // the complete source URL remains in the local inbox.
+    if (note.source.label) lines.push(`— ${note.source.label}`, "");
+    lines.push("--------------------", "", "");
+    return lines.join("\n");
+  }
+
+  function formatTextDocument(clips) {
+    return `Answer Clipper\n\n${Array.isArray(clips) ? clips.map(formatTextEntry).join("") : ""}`;
+  }
+
+  function getNoteContent(rawClip) {
+    const clip = normalizeClip(rawClip);
+    let label = clip.pageTitle.replace(/\s+/g, " ").trim();
+    if (!label || /^(?:https?|file):\/\//i.test(label)) {
+      const url = clip.pageUrl ? new URL(clip.pageUrl) : null;
+      label = url?.protocol === "file:" ? "Local document" : url?.hostname || "";
+    }
+    const characters = Array.from(label);
+    if (characters.length > 80) label = `${characters.slice(0, 79).join("")}…`;
+    return {
+      quote: clip.quote.replace(/\r\n?/g, "\n"),
+      annotation: clip.annotation.replace(/\r\n?/g, "\n"),
+      source: { label, url: clip.pageUrl },
+    };
+  }
+
+  function escapeLinkLabel(value) {
+    return value.replace(/[\\\[\]*_`<>]/g, "\\$&");
+  }
+
   function normalizeTags(tags) {
     const values = Array.isArray(tags)
       ? tags
       : typeof tags === "string"
-        ? tags.split(/[,，\s]+/)
+        ? tags.split(/[,\uFF0C\s]+/)
         : [];
 
     return [...new Set(values
@@ -87,7 +112,10 @@
     if (typeof value !== "string") return "";
     try {
       const url = new URL(value);
-      return url.protocol === "https:" ? url.href : "";
+      if (!["http:", "https:", "file:"].includes(url.protocol)) return "";
+      url.username = "";
+      url.password = "";
+      return url.href;
     } catch {
       return "";
     }
@@ -98,34 +126,12 @@
     return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
   }
 
-  function firstMeaningfulLine(value) {
-    return value.split(/\r?\n/).find((line) => line.trim())?.trim() || "";
-  }
-
-  function escapeHeading(value) {
-    return value.replace(/^\s*#+\s*/, "").replace(/[\r\n]+/g, " ");
-  }
-
-  function formatTimestamp(value) {
-    const date = new Date(value);
-    const parts = new Intl.DateTimeFormat("zh-CN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    }).formatToParts(date);
-    const get = (type) => parts.find((part) => part.type === type)?.value || "00";
-    return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
-  }
-
   function createId() {
     if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
-  const api = { formatDocument, formatEntry, normalizeClip, normalizeTags };
+  const api = { formatDocument, formatEntry, formatTextDocument, formatTextEntry, getNoteContent, normalizeClip, normalizeTags };
   root.AnswerClipperMarkdown = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof self !== "undefined" ? self : globalThis);

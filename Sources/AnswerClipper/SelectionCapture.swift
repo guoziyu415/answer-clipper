@@ -1,6 +1,11 @@
 import AppKit
 import ApplicationServices
 
+struct SelectionSnapshot: Equatable {
+    let text: String
+    let fingerprint: String
+}
+
 final class SelectionCapture {
     var isAccessibilityTrusted: Bool {
         AXIsProcessTrusted()
@@ -34,28 +39,38 @@ final class SelectionCapture {
         in processIdentifier: pid_t,
         completion: @escaping (String?) -> Void
     ) {
+        captureSnapshot(in: processIdentifier) { snapshot in
+            completion(snapshot?.text)
+        }
+    }
+
+    func captureSnapshot(
+        in processIdentifier: pid_t,
+        delay: TimeInterval = 0.06,
+        completion: @escaping (SelectionSnapshot?) -> Void
+    ) {
         prepareApplication(processIdentifier: processIdentifier)
 
-        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.06) {
-            let selectedText = Self.selectedText(in: processIdentifier)
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + delay) {
+            let snapshot = Self.selectionSnapshot(in: processIdentifier)
             DispatchQueue.main.async {
-                completion(selectedText)
+                completion(snapshot)
             }
         }
     }
 
-    private static func selectedText(in processIdentifier: pid_t) -> String? {
+    private static func selectionSnapshot(in processIdentifier: pid_t) -> SelectionSnapshot? {
         let application = AXUIElementCreateApplication(processIdentifier)
 
         if let focused = elementAttribute(application, kAXFocusedUIElementAttribute),
-           let text = selectedText(from: focused) {
-            return text
+           let snapshot = selectionSnapshot(from: focused) {
+            return snapshot
         }
 
         let system = AXUIElementCreateSystemWide()
         if let focused = elementAttribute(system, kAXFocusedUIElementAttribute),
-           let text = selectedText(from: focused) {
-            return text
+           let snapshot = selectionSnapshot(from: focused) {
+            return snapshot
         }
 
         // Chromium exposes document selections on its AXWebArea. Search the
@@ -68,18 +83,21 @@ final class SelectionCapture {
             let element = queue[index]
             index += 1
 
-            if let text = selectedText(from: element) {
-                return text
+            if let snapshot = selectionSnapshot(from: element) {
+                return snapshot
             }
             queue.append(contentsOf: children(of: element))
         }
         return nil
     }
 
-    private static func selectedText(from element: AXUIElement) -> String? {
+    private static func selectionSnapshot(from element: AXUIElement) -> SelectionSnapshot? {
         if let text = stringAttribute(element, kAXSelectedTextAttribute),
            !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return text
+            return SelectionSnapshot(
+                text: text,
+                fingerprint: selectionFingerprint(for: element, text: text)
+            )
         }
 
         var markerRange: CFTypeRef?
@@ -101,7 +119,29 @@ final class SelectionCapture {
               let text = value as? String,
               !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         else { return nil }
-        return text
+        return SelectionSnapshot(
+            text: text,
+            fingerprint: "\(CFHash(element)):marker:\(CFHash(markerRange)):\(text)"
+        )
+    }
+
+    private static func selectionFingerprint(for element: AXUIElement, text: String) -> String {
+        var value: CFTypeRef?
+        if AXUIElementCopyAttributeValue(
+            element,
+            kAXSelectedTextRangeAttribute as CFString,
+            &value
+        ) == .success,
+           let value,
+           CFGetTypeID(value) == AXValueGetTypeID() {
+            let axValue = unsafeBitCast(value, to: AXValue.self)
+            var range = CFRange()
+            if AXValueGetType(axValue) == .cfRange,
+               AXValueGetValue(axValue, .cfRange, &range) {
+                return "\(CFHash(element)):range:\(range.location):\(range.length):\(text)"
+            }
+        }
+        return "\(CFHash(element)):text:\(text)"
     }
 
     private static func stringAttribute(

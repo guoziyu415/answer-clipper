@@ -22,7 +22,7 @@ final class AnnotationPanelController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        panel.title = "添加批注"
+        panel.title = "Add Annotation"
         panel.level = .floating
         panel.isReleasedWhenClosed = false
         panel.hidesOnDeactivate = false
@@ -115,7 +115,7 @@ private struct AnnotationView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("选中的内容")
+            Text("Selected Text")
                 .font(.headline)
 
             ScrollView {
@@ -127,7 +127,7 @@ private struct AnnotationView: View {
             .frame(height: 110)
             .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
 
-            Text("批注")
+            Text("Annotation")
                 .font(.headline)
 
             TextEditor(text: $annotation)
@@ -138,14 +138,14 @@ private struct AnnotationView: View {
                 .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
 
             HStack(spacing: 12) {
-                Picker("类型", selection: $kind) {
+                Picker("Category", selection: $kind) {
                     ForEach(ClipKind.allCases) { kind in
                         Text(kind.rawValue).tag(kind)
                     }
                 }
                 .frame(width: 155)
 
-                TextField("标签，用空格或逗号分隔", text: $tags)
+                TextField("Tags separated by spaces or commas", text: $tags)
                     .textFieldStyle(.roundedBorder)
             }
 
@@ -158,26 +158,26 @@ private struct AnnotationView: View {
                     .truncationMode(.middle)
                     .help(destinationURL.path)
                 Spacer()
-                Button("更改本次位置…") {
+                Button("Change for This Clip…") {
                     if let chosenURL = onChooseDestination(destinationURL) {
                         destinationURL = chosenURL
                     }
                 }
             }
 
-            Toggle("将此位置设为以后默认位置", isOn: $makeDefault)
+            Toggle("Use this location as the default", isOn: $makeDefault)
                 .font(.caption)
 
             HStack {
                 if let sourceApplication {
-                    Text("来源：\(sourceApplication)")
+                    Text("Source: \(sourceApplication)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button("取消", action: onCancel)
+                Button("Cancel", action: onCancel)
                     .keyboardShortcut(.cancelAction)
-                Button("保存") {
+                Button("Save") {
                     onSave(
                         AnnotationSaveRequest(
                             clip: Clip(
@@ -206,7 +206,7 @@ private struct AnnotationView: View {
 
     private func parseTags(_ input: String) -> [String] {
         input
-            .components(separatedBy: CharacterSet(charactersIn: ",， \n\t"))
+            .components(separatedBy: CharacterSet(charactersIn: ",\u{FF0C} \n\t"))
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
             .map { $0.hasPrefix("#") ? $0 : "#\($0)" }

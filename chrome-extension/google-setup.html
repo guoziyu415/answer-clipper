@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Google Docs setup - Answer Clipper</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <main>
+    <h1>Google Docs setup</h1>
+    <p>This is a one-time setup for the extension's maintainer. After an OAuth client is configured in the build, users only need to select Connect Google and authorize their account.</p>
+    <section>
+      <h2>Configure your Google app</h2>
+      <ol>
+        <li>Open the <a href="https://console.cloud.google.com/apis/library/docs.googleapis.com" target="_blank" rel="noopener">Google Cloud console</a>, choose your project, and enable the Google Docs API.</li>
+        <li>Configure Google Auth Platform branding and audience. During testing, add your Google account as a test user.</li>
+        <li>Add the scope <code>https://www.googleapis.com/auth/documents</code>. This is a sensitive scope; public distribution requires Google's applicable verification.</li>
+        <li>Create an OAuth client of type <strong>Chrome Extension</strong> with the extension ID shown on its card in <code>chrome://extensions</code>.</li>
+        <li>From the repository root, run <code>node scripts/configure-google-oauth.mjs YOUR_CLIENT_ID.apps.googleusercontent.com</code>.</li>
+        <li>Reload Answer Clipper in <code>chrome://extensions</code>, reopen Settings, and select Connect Google.</li>
+      </ol>
+      <p>No client secret or API key is needed. Keep the extension ID stable; the OAuth client must match the loaded extension.</p>
+    </section>
+    <section>
+      <h2>Choose where notes go</h2>
+      <p>Paste an existing Google Docs link, including its tab parameter if needed, or create a document from Settings. Choose Google Docs in the annotation's Save to selector and click Save, or select Export Inbox to Google Docs to send the collected notes together.</p>
+      <p>Local copies remain available if Google is offline or permission expires. Repeated exports skip annotations already added to the selected tab, unless their tracking ranges were removed by edits in Google Docs.</p>
+    </section>
+  </main>
+</body>
+</html>

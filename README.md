@@ -1,23 +1,51 @@
 # Answer Clipper
 
-Answer Clipper is a local-first annotation tool for saving only the parts of an AI answer that matter. Select text, add a note, and append it to a Markdown file without sending another chat message or interrupting your reading flow.
+Answer Clipper is a local-first annotation tool for keeping the parts of an article, document, or AI answer that matter. Select text, add a note, and choose Google Docs, Markdown, plain text, or a local inbox without interrupting your reading flow.
 
-The project includes a macOS app for system-wide annotation, a Chrome extension for ChatGPT on the web, and an experimental MCP app.
+The project includes a macOS app for system-wide annotation, a Chrome extension for ordinary web pages, and an experimental local-only MCP app. All product UI, messages, exports, tests, and documentation are written in English.
+
+## See it in action
+
+Select a sentence, add your own thought, choose **Save to**, and click the single **Save** button.
+
+![The running Chrome extension with selected text, an annotation, and a single Save button](docs/screenshots/chrome-annotation.png)
+
+These are screenshots of the real extension running in Chromium. The background uses an English reading fixture, not a live ChatGPT conversation. The example notes are saved by the extension during its [end-to-end test](docs/TESTING.md).
+
+<details>
+<summary>See text selection and the local inbox</summary>
+
+Select the part you want to keep. The **Annotate** button appears beside the selection.
+
+![A selected sentence with the extension's Annotate button](docs/screenshots/chrome-selection.png)
+
+Keep collecting while you read, then export your annotations together as Markdown or TXT. Settings also lets you connect a reusable file for each format.
+
+![The extension settings page showing three saved annotations and export controls](docs/screenshots/chrome-inbox.png)
+
+</details>
 
 ## Features
 
 - Shows an **Annotate** button next to a real text selection
+- Works on HTTP and HTTPS articles, reference pages, blogs, and AI conversations, including ChatGPT
 - Saves the selected quote with an optional annotation, category, and tags
-- Supports repeated clipping into one Markdown file
+- Supports repeated, serialized clipping into a Markdown or TXT file in Chrome
 - Lets you choose a destination for each clip or set a default file
+- Keeps a browser-local inbox backed by IndexedDB, with export and clear controls
+- Optionally appends annotations to a selected Google Doc, with local copies and duplicate-safe retry
 - Records the source application and save time
 - Provides `Option-Command-A` to annotate and `Option-Command-S` to save quickly
-- Works locally without an account, AI API, or network request
+- Local saving works without an account or network request; Google Docs requires an explicit connection
 - Does not read, clear, or modify the system clipboard
 
 ## Download
 
-Download the latest macOS app from [GitHub Releases](https://github.com/guoziyu415/answer-clipper/releases/latest). The Chrome extension is included directly in the repository under `chrome-extension`.
+- **Chrome beta:** download `Answer-Clipper-Chrome-v0.6.0.zip` from the [Chrome v0.6.0 Beta release](https://github.com/guoziyu415/answer-clipper/releases/tag/chrome-v0.6.0-beta.1). Unzip it into a permanent folder, then use **Load unpacked** in Chrome to select the folder containing `manifest.json`. No Node.js, npm, server, or API key is needed for local saving. See the [beta installation guide and limitations](docs/releases/chrome-v0.6.0-beta.1.md).
+- **macOS:** previous app downloads remain on [GitHub Releases](https://github.com/guoziyu415/answer-clipper/releases). The Chrome beta does not include a new macOS binary.
+- **Source:** the Chrome extension is also available under `chrome-extension` in this repository.
+
+Downloads and source follow the repository's visibility. A release in a private repository is available only to people with repository access. The Chrome beta is a GitHub download, not a Chrome Web Store listing.
 
 ## macOS app
 
@@ -25,7 +53,7 @@ The macOS app works with ChatGPT Desktop, browsers, PDF readers, and other appli
 
 ### Install a release
 
-1. Download `Answer-Clipper-macOS-v0.1.0.zip` from GitHub Releases.
+1. Download the latest `Answer-Clipper-macOS-vX.Y.Z.zip` from GitHub Releases.
 2. Unzip it and move `Answer Clipper.app` to `Applications`.
 3. Open the app. If macOS blocks the first launch, right-click the app, choose **Open**, and confirm.
 4. Select **Accessibility Permission...** from the highlighter icon in the menu bar.
@@ -45,17 +73,31 @@ Install Xcode Command Line Tools or Xcode, then run:
 
 Open `build/Answer Clipper.app` and grant Accessibility permission when prompted.
 
+To regenerate the macOS icon from the shared SVG source:
+
+```bash
+./scripts/build-macos-icon.sh
+```
+
 For a stable development signature that preserves Accessibility permission across rebuilds:
 
 ```bash
 CODE_SIGN_IDENTITY="Apple Development: your-name@example.com (TEAMID)" ./scripts/build-app.sh
 ```
 
-Without `CODE_SIGN_IDENTITY`, the build script uses a local ad-hoc signature.
+When full Xcode is available, the build script creates a universal Apple Silicon and Intel binary without changing the system-wide developer directory. Without full Xcode, it creates a native-architecture development build. Without `CODE_SIGN_IDENTITY`, the app uses a local ad-hoc signature.
+
+For a notarized release, first store notarization credentials in a keychain profile, then run:
+
+```bash
+CODE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
+NOTARY_PROFILE="answer-clipper-notary" \
+./scripts/package-macos-app.sh
+```
 
 ## Chrome extension
 
-The Chrome extension works on `chatgpt.com`. It does not require macOS Accessibility permission and cannot read the ChatGPT desktop app.
+The Chrome extension works on ordinary HTTP and HTTPS pages, including articles, blogs, reference pages, and AI conversations such as ChatGPT. It does not require macOS Accessibility permission; use the macOS app for desktop applications.
 
 ### Install from GitHub
 
@@ -64,17 +106,30 @@ The Chrome extension works on `chatgpt.com`. It does not require macOS Accessibi
 3. Open `chrome://extensions` in Chrome.
 4. Enable **Developer mode**.
 5. Select **Load unpacked** and choose the repository's `chrome-extension` folder.
-6. Open or refresh `https://chatgpt.com`.
-7. Select text in an answer and click **Annotate**.
+6. Open or refresh a web page you want to annotate.
+7. Select text and click **Annotate**.
 
-Each annotation is saved to the extension's local inbox first. You can connect a default Markdown file, save one annotation to a separate file, or export the entire inbox.
+Each annotation has a **Save to** selector: **Markdown (.md)**, **Plain text (.txt)**, **Google Docs**, or **Local inbox (export later)**. Choose the destination, then click **Save**. The last saved choice is remembered for the next annotation; you can override it without leaving the dialog.
+
+For Markdown or TXT, Save appends to that format's reusable file if connected; otherwise it opens Chrome's save-location dialog. Exports focus on the quote and your annotation, without repeated titles or metadata fields. Connect separate default files under **Settings > Reusable Local Files**. To collect notes before exporting, choose **Local inbox (export later)**, then export the inbox as Markdown or TXT from the popup or settings.
+
+Each annotation is saved to IndexedDB first. Writes from multiple tabs and websites are serialized to prevent lost updates. Each clip keeps its own page title and source link. A canceled download leaves the local copy intact. If a file or Google write fails, the dialog keeps your draft and displays an error so you can retry or choose another destination.
+
+If you already installed an older version, click **Reload** on its card in `chrome://extensions`, review any updated site-access prompt, and refresh the open pages. Reloading preserves the local inbox. Chrome's extension site-access controls let you limit which websites it can run on.
+
+For a local HTML document, enable **Allow access to file URLs** in the extension's **Details**, then open the file in Chrome. This also lets you try `chrome-extension/tests/e2e/reading-fixture.html` directly. The in-app browser does not load the Chrome extension.
+
+The extension uses standard text selections in the top-level page. Input fields, password fields, and editable areas are excluded. Chrome settings pages, the Chrome Web Store, built-in PDF viewers, text drawn inside a canvas, and text inside embedded frames are not supported.
 
 Run the extension tests:
 
 ```bash
 cd chrome-extension
+npm ci
 npm test
 ```
+
+For a real browser test and reproducible screenshots, see [Testing and screenshots](docs/TESTING.md).
 
 Create a Chrome Web Store upload archive:
 
@@ -84,9 +139,19 @@ Create a Chrome Web Store upload archive:
 
 See [STORE_LISTING.md](chrome-extension/STORE_LISTING.md) for listing copy and permission explanations, and [PRIVACY.md](chrome-extension/PRIVACY.md) for the privacy policy.
 
+### Save to Google Docs
+
+Google Docs is an optional destination. It needs a Google OAuth client registered for the installed extension ID; see [Google Docs setup](docs/GOOGLE_DOCS.md). A configured development client is not automatically valid for someone else's unpacked installation. If Settings says **Setup required**, that build has no client configured.
+
+Once configured, open **Configure Save Destinations > Google Docs > Connect Google**. Paste an existing document link or create a new document. In the annotation dialog, choose **Google Docs** under **Save to** and click **Save**. The selected document's title is shown before saving. Alternatively, use **Export Inbox to Google Docs** to send collected notes together. A link's `tab` parameter selects the destination tab; otherwise the first tab is used. Connecting or choosing a document never silently switches local saves to the cloud.
+
+New content is appended to the document. Local notes remain available if a request fails. Re-export checks tracking ranges in the selected document tab to avoid duplicating entries that were already written.
+
 ## Experimental MCP app
 
-`plugins/answer-clipper` provides an optional in-chat workspace for collecting, editing, reordering, and exporting clips. Because ChatGPT widgets run in an isolated iframe, the MCP version cannot directly capture text selected in the surrounding conversation. The macOS app or Chrome extension is recommended for selection-based annotation.
+`plugins/answer-clipper` provides an optional local in-chat workspace for collecting, editing, reordering, and exporting clips. Because ChatGPT widgets run in an isolated iframe, the MCP version cannot directly capture text selected in the surrounding conversation. The macOS app or Chrome extension is recommended for selection-based annotation.
+
+The MCP server intentionally binds only to a loopback address. Its browser preview API rejects cross-origin access. It remains a single-user development tool and must not be exposed as a public service without authentication and per-user storage.
 
 See [plugins/answer-clipper/README.md](plugins/answer-clipper/README.md) for development instructions.
 
@@ -100,24 +165,34 @@ Run the Swift tests:
 swift test
 ```
 
-## Markdown format
+Run the English-only repository check:
 
-Each entry keeps the quote, optional annotation, category, tags, source, and timestamp separate:
+```bash
+node scripts/check-english.mjs
+```
+
+GitHub Actions runs the English check, Chrome unit and browser tests, MCP tests and build, Swift tests, and a universal macOS build check.
+
+## Note format
+
+Chrome exports use a compact reading format: the excerpt first, your annotation once beneath it, and a short source title at the end. Markdown uses a blockquote and a titled link; Google Docs uses an indented quote and a smaller native source hyperlink. TXT uses quotation marks and a source title only, since plain text cannot hide a URL behind a clickable label.
 
 ```markdown
-## My takeaway
-
 > The selected part of the answer.
 
-**Annotation:**
-My takeaway
+Try this idea in my next reading session.
 
-**Category:** Thought
-**Tags:** #plugin #notes
-**Source:** ChatGPT
-**Time:** 2026-08-14 00:10
+[Example article](<https://example.org/article>)
+
+---
 ```
+
+Category, tags, timestamps, and the complete source URL remain in the local inbox. They are not printed as fields in Chrome exports. **More options** in the annotation dialog holds the optional category and tags. Existing saved files and Google entries are not rewritten; the new format applies to new saves and new local exports. Re-exporting to the same Google document still skips entries already present. The macOS app retains its original detailed Markdown format.
 
 ## Privacy
 
-Answer Clipper works locally. It does not call an AI model or create new chat messages. Chrome extension data remains in browser storage or a Markdown file selected by the user. The macOS app writes only to the Markdown file selected by the user.
+Answer Clipper does not call an AI model or create new chat messages. Local saving keeps data in browser storage or a user-selected Markdown or TXT file. If you opt into Google Docs, annotations and source details are sent directly to Google's Docs API; no Answer Clipper server receives them. Chrome manages OAuth tokens, and the app never returns them to web pages. The macOS app writes only to the selected Markdown file.
+
+## License
+
+Answer Clipper is available under the [MIT License](LICENSE).

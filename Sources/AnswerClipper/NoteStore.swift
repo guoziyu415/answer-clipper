@@ -1,10 +1,10 @@
 import Foundation
 
 enum ClipKind: String, CaseIterable, Identifiable {
-    case thought = "想法"
-    case question = "问题"
-    case verify = "待验证"
-    case highlight = "重点"
+    case thought = "Thought"
+    case question = "Question"
+    case verify = "Verify"
+    case highlight = "Highlight"
 
     var id: String { rawValue }
 }
@@ -99,24 +99,24 @@ enum MarkdownFormatter {
         ]
 
         if !clip.annotation.isEmpty {
-            lines += ["**批注：**  ", clip.annotation, ""]
+            lines += ["**Annotation:**  ", clip.annotation, ""]
         }
 
-        lines += ["**类型：** \(clip.kind.rawValue)  "]
+        lines += ["**Category:** \(clip.kind.rawValue)  "]
         if !clip.tags.isEmpty {
-            lines += ["**标签：** \(clip.tags.joined(separator: " "))  "]
+            lines += ["**Tags:** \(clip.tags.joined(separator: " "))  "]
         }
         if let sourceApplication = clip.sourceApplication, !sourceApplication.isEmpty {
-            lines += ["**来源：** \(sourceApplication)  "]
+            lines += ["**Source:** \(sourceApplication)  "]
         }
-        lines += ["**时间：** \(timestamp)", "", "---", "", ""]
+        lines += ["**Time:** \(timestamp)", "", "---", "", ""]
 
         return lines.joined(separator: "\n")
     }
 
     private static let timestampFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
         return formatter
     }()
