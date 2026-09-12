@@ -1,0 +1,29 @@
+name: Capture Chrome store screenshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: chrome-extension/package-lock.json
+      - run: npm ci
+        working-directory: chrome-extension
+      - run: npx playwright install --with-deps chromium
+        working-directory: chrome-extension
+      - run: node tests/e2e/run.mjs --store-screenshots
+        working-directory: chrome-extension
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chrome-store-screenshots
+          path: build/chrome-store-screenshots/chrome-*.png
+          if-no-files-found: error

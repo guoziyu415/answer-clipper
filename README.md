@@ -45,7 +45,7 @@ Keep collecting while you read, then export your annotations together as Markdow
 - **macOS:** previous app downloads remain on [GitHub Releases](https://github.com/guoziyu415/answer-clipper/releases). The Chrome beta does not include a new macOS binary.
 - **Source:** the Chrome extension is also available under `chrome-extension` in this repository.
 
-Downloads and source follow the repository's visibility. A release in a private repository is available only to people with repository access. The Chrome beta is a GitHub download, not a Chrome Web Store listing.
+The source repository and GitHub downloads are public. The Chrome beta is a GitHub download, not a Chrome Web Store listing. See the [product website](https://guoziyu415.github.io/answer-clipper/) and [privacy policy](https://guoziyu415.github.io/answer-clipper/privacy.html).
 
 ## macOS app
 

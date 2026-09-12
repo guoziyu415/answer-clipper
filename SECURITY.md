@@ -6,7 +6,7 @@ Security fixes are applied to the latest release on the `main` branch.
 
 ## Reporting a vulnerability
 
-Please do not publish sensitive vulnerability details in a public issue. Contact the maintainer privately through the GitHub account associated with this repository and include:
+Please do not publish sensitive vulnerability details in a public issue. Email the maintainer at guoziyu415@gmail.com and include:
 
 - The affected version and component
 - Reproduction steps

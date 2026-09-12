@@ -7,7 +7,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const extensionDir = path.resolve(testDir, "../..");
 const repositoryDir = path.resolve(extensionDir, "..");
-const outputDir = path.join(repositoryDir, "build", "chrome-e2e");
+const storeScreenshots = process.argv.includes("--store-screenshots");
+const outputDir = path.join(repositoryDir, "build", storeScreenshots ? "chrome-store-screenshots" : "chrome-e2e");
 const bundledBrowsers = path.join(repositoryDir, ".tools", "playwright");
 if (!process.env.PLAYWRIGHT_BROWSERS_PATH && await fs.stat(bundledBrowsers).catch(() => null)) {
   process.env.PLAYWRIGHT_BROWSERS_PATH = bundledBrowsers;
@@ -21,7 +22,7 @@ const readingURLs = [
 ];
 const profile = await fs.mkdtemp(path.join(os.tmpdir(), "answer-clipper-e2e-"));
 await fs.mkdir(outputDir, { recursive: true });
-const captureScreenshots = process.argv.includes("--screenshots");
+const captureScreenshots = storeScreenshots || process.argv.includes("--screenshots");
 const checks = [];
 const screenshots = [];
 let context;
@@ -31,8 +32,8 @@ async function launch() {
   context = await chromium.launchPersistentContext(profile, {
     channel: "chromium",
     headless: !process.argv.includes("--headed"),
-    viewport: { width: 1120, height: 840 },
-    deviceScaleFactor: 2,
+    viewport: storeScreenshots ? { width: 1280, height: 800 } : { width: 1120, height: 840 },
+    deviceScaleFactor: storeScreenshots ? 1 : 2,
     colorScheme: "light",
     locale: "en-US",
     acceptDownloads: true,
@@ -172,7 +173,7 @@ async function selectQuote(page, ui, selector, expectBubble = true) {
 
 async function snapshot(page, name) {
   if (!captureScreenshots) return;
-  await page.screenshot({ path: path.join(outputDir, name), animations: "disabled", fullPage: name === "chrome-inbox.png" });
+  await page.screenshot({ path: path.join(outputDir, name), animations: "disabled", fullPage: !storeScreenshots && name === "chrome-inbox.png" });
   screenshots.push(name);
 }
 
@@ -611,7 +612,7 @@ try {
   }
   passed("Existing Markdown and TXT files receive a blank-line separator through real browser file handles");
 
-  if (captureScreenshots) {
+  if (captureScreenshots && !storeScreenshots) {
     const destination = path.join(repositoryDir, "docs", "screenshots");
     await fs.mkdir(destination, { recursive: true });
     for (const name of screenshots) await fs.copyFile(path.join(outputDir, name), path.join(destination, name));
