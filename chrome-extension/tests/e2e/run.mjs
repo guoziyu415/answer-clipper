@@ -5,10 +5,12 @@ import os from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
-const extensionDir = path.resolve(testDir, "../..");
-const repositoryDir = path.resolve(extensionDir, "..");
+const sourceDir = path.resolve(testDir, "../..");
+const extensionDir = process.env.ANSWER_CLIPPER_EXTENSION_PATH ? path.resolve(process.env.ANSWER_CLIPPER_EXTENSION_PATH) : sourceDir;
+const repositoryDir = path.resolve(sourceDir, "..");
 const storeScreenshots = process.argv.includes("--store-screenshots");
-const outputDir = path.join(repositoryDir, "build", storeScreenshots ? "chrome-store-screenshots" : "chrome-e2e");
+const recordLive = process.argv.includes("--record-live");
+const outputDir = path.join(repositoryDir, "build", recordLive ? "chrome-live-qa" : storeScreenshots ? "chrome-store-screenshots" : "chrome-e2e");
 const bundledBrowsers = path.join(repositoryDir, ".tools", "playwright");
 if (!process.env.PLAYWRIGHT_BROWSERS_PATH && await fs.stat(bundledBrowsers).catch(() => null)) {
   process.env.PLAYWRIGHT_BROWSERS_PATH = bundledBrowsers;
@@ -22,7 +24,7 @@ const readingURLs = [
 ];
 const profile = await fs.mkdtemp(path.join(os.tmpdir(), "answer-clipper-e2e-"));
 await fs.mkdir(outputDir, { recursive: true });
-const captureScreenshots = storeScreenshots || process.argv.includes("--screenshots");
+const captureScreenshots = recordLive || storeScreenshots || process.argv.includes("--screenshots");
 const checks = [];
 const screenshots = [];
 let context;
@@ -32,8 +34,9 @@ async function launch() {
   context = await chromium.launchPersistentContext(profile, {
     channel: "chromium",
     headless: !process.argv.includes("--headed"),
-    viewport: storeScreenshots ? { width: 1280, height: 800 } : { width: 1120, height: 840 },
-    deviceScaleFactor: storeScreenshots ? 1 : 2,
+    viewport: storeScreenshots || recordLive ? { width: 1280, height: 800 } : { width: 1120, height: 840 },
+    deviceScaleFactor: storeScreenshots || recordLive ? 1 : 2,
+    ...(recordLive ? { recordVideo: { dir: path.join(profile, "recordings"), size: { width: 1280, height: 800 } } } : {}),
     colorScheme: "light",
     locale: "en-US",
     acceptDownloads: true,
@@ -46,7 +49,9 @@ async function launch() {
     }));
   }
   const worker = context.serviceWorkers()[0] || await context.waitForEvent("serviceworker");
-  return worker.url().split("/")[2];
+  const id = worker.url().split("/")[2];
+  if (process.env.ANSWER_CLIPPER_EXPECTED_ID) assert.equal(id, process.env.ANSWER_CLIPPER_EXPECTED_ID, "The tested extension must have the expected store identity");
+  return id;
 }
 
 function passed(description) {
@@ -360,13 +365,15 @@ try {
     passed("Chrome blocks local HTML injection until file access is enabled");
   }
 
-  if (process.argv.includes("--live")) {
+  if (process.argv.includes("--live") || recordLive) {
     await options.evaluate(() => AnswerClipperDatabase.deleteFileHandle());
     const before = (await send(options, { type: "GET_STATUS" })).count;
     const live = await openReadingPage("https://example.com/");
     const liveQuote = await selectQuote(live.page, live.ui, "h1");
+    if (recordLive) await live.page.waitForTimeout(1200);
     await live.ui.click("#bubble");
     await live.ui.fill("#annotation", "A clip from a live public website.");
+    if (recordLive) await live.page.waitForTimeout(1800);
     await live.ui.click("#save");
     await eventually(async () => (await send(options, { type: "GET_STATUS" })).count, before + 1, "Live website clip must save");
     const liveClips = await options.evaluate(() => AnswerClipperDatabase.getClips());
@@ -375,6 +382,40 @@ try {
     assert.equal(saved.quote, liveQuote);
     assert.equal(saved.pageTitle, await live.page.title());
     passed("The real public example.com page can be selected, annotated, and saved");
+    if (recordLive) {
+      const video = live.page.video();
+      await live.page.waitForTimeout(1200);
+      const client = await context.newCDPSession(options);
+      await client.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: outputDir, eventsEnabled: true });
+      for (const format of ["markdown", "txt"]) {
+        const previous = await options.evaluate(async () => (await chrome.downloads.search({ orderBy: ["-startTime"], limit: 1 }))[0]?.id ?? -1);
+        await selectQuote(live.page, live.ui, "h1");
+        await live.ui.click("#bubble");
+        await live.ui.select("#save-destination", format);
+        await live.ui.fill("#annotation", `Real website test: save as ${format}.`);
+        await live.page.waitForTimeout(1800);
+        await live.ui.click("#save");
+        await eventually(() => live.ui.read("#overlay", "visible"), false, "Recorded save must close the dialog");
+        await eventually(async () => options.evaluate(async (previous) => {
+          const item = (await chrome.downloads.search({ orderBy: ["-startTime"], limit: 1 }))[0];
+          return Boolean(item && item.id > previous && item.state === "complete");
+        }, previous), true, "Recorded download must complete");
+        const filename = await options.evaluate(async () => (await chrome.downloads.search({ orderBy: ["-startTime"], limit: 1 }))[0].filename);
+        assert.equal(path.extname(filename), format === "txt" ? ".txt" : ".md");
+        assert.ok((await fs.readFile(filename, "utf8")).includes(`Real website test: save as ${format}.`));
+        await live.page.waitForTimeout(1200);
+      }
+      assert.equal((await send(options, { type: "GET_STATUS" })).count, before + 3);
+      await live.page.goto(`chrome-extension://${extensionId}/options.html`);
+      await live.page.locator("#count").scrollIntoViewIfNeeded();
+      await eventually(() => live.page.locator("#count").innerText(), String(before + 3), "All recorded saves must have inbox backups");
+      await live.page.screenshot({ path: path.join(outputDir, "live-inbox.png") });
+      await live.page.waitForTimeout(1800);
+      await live.page.close();
+      await video.saveAs(path.join(outputDir, "chrome-live-local-saving.webm"));
+      passed("Recorded real-site inbox, Markdown and TXT saves with actual downloaded-file verification");
+      await send(options, { type: "SET_SAVE_DESTINATION", destination: "inbox" });
+    }
   }
 
   // Exercise all local choices through the one-button annotation UI.
@@ -612,11 +653,17 @@ try {
   }
   passed("Existing Markdown and TXT files receive a blank-line separator through real browser file handles");
 
-  if (captureScreenshots && !storeScreenshots) {
+  if (captureScreenshots && !storeScreenshots && !recordLive) {
     const destination = path.join(repositoryDir, "docs", "screenshots");
     await fs.mkdir(destination, { recursive: true });
     for (const name of screenshots) await fs.copyFile(path.join(outputDir, name), path.join(destination, name));
   }
+  if (recordLive) await fs.writeFile(path.join(outputDir, "verification.json"), JSON.stringify({
+    extensionId, version: JSON.parse(await fs.readFile(path.join(extensionDir, "manifest.json"), "utf8")).version,
+    checks, recording: "chrome-live-local-saving.webm", recordedSite: "https://example.com/",
+    recordingScope: "Real Chromium UI, live public page, real IndexedDB and downloaded Markdown/TXT files. No Google mocks run in the recorded flow.",
+    limitations: ["Google OAuth/API checks elsewhere in this suite are mocked, not a live account test.", "Headless download approval is automatic; native OS save-location dialogs are not tested.", "This recording is not a Google OAuth verification video."],
+  }, null, 2) + "\n");
   console.log(`\n${checks.length} end-to-end checks passed. Artifacts: ${outputDir}`);
 } catch (error) {
   if (activePage && !activePage.isClosed()) {
