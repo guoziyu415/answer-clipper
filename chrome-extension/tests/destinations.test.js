@@ -58,7 +58,7 @@ function fakeFile(name, initial = "") {
   return {
     name, text: () => text,
     queryPermission: async () => "granted",
-    getFile: async () => ({ size: Buffer.byteLength(text) }),
+    getFile: async () => new Blob([text]),
     createWritable: async () => ({ write: async (value) => { text += value; }, seek: async () => {}, close: async () => {} }),
   };
 }
@@ -106,6 +106,62 @@ test("switching formats appends only to the matching connected file", async () =
   assert.equal(txt.text(), previousText);
   assert.match(md.text(), /> Keep this sentence 🙂\n\nA useful thought/);
   assert.equal(app.downloads.length, 0);
+});
+
+test("existing Markdown and TXT files keep a blank line before appended notes", async () => {
+  const endings = [
+    ["", "\n\n"], ["\n", "\n"], ["\n\n", ""], ["\n\n\n", ""],
+    ["\r\n", "\r\n"], ["\r\n\r\n", ""], ["\r", "\n\n"],
+  ];
+  for (const format of ["markdown", "txt"]) {
+    const entry = format === "txt" ? markdown.formatTextEntry(clip) : markdown.formatEntry(clip);
+    for (const [ending, separator] of endings) {
+      const app = setup();
+      const original = `Existing paragraph 🙂${ending}`;
+      const file = fakeFile(`Notes.${format === "txt" ? "txt" : "md"}`, original);
+      app.handles.set(format, file);
+      const result = await app.send({ type: "SAVE_CLIP", destination: format, clip });
+      assert.equal(result.savedTo, "default");
+      assert.equal(file.text(), original + separator + entry, `${format}: ${JSON.stringify(ending)}`);
+      const second = { ...clip, id: "clip-2", annotation: "Another note" };
+      await app.send({ type: "SAVE_CLIP", destination: format, clip: second });
+      const nextEntry = format === "txt" ? markdown.formatTextEntry(second) : markdown.formatEntry(second);
+      assert.equal(file.text(), original + separator + entry + nextEntry);
+    }
+  }
+});
+
+test("file append reads at most four trailing bytes, including very short files", async () => {
+  for (const original of [">", "🙂", "A".repeat(100_000)]) {
+    const app = setup();
+    const file = fakeFile("Notes.md", original);
+    const snapshot = new Blob([original]);
+    const reads = [];
+    file.getFile = async () => ({
+      size: snapshot.size,
+      slice(start) { reads.push(start); return snapshot.slice(start); },
+    });
+    app.handles.set("markdown", file);
+    const result = await app.send({ type: "SAVE_CLIP", destination: "markdown", clip });
+    assert.equal(result.savedTo, "default");
+    assert.deepEqual(reads, [Math.max(0, snapshot.size - 4)]);
+    assert.equal(file.text(), original + "\n\n" + markdown.formatEntry(clip));
+  }
+});
+
+test("failure to read the file ending keeps the inbox backup and never opens a writer", async () => {
+  const app = setup();
+  const file = fakeFile("Notes.md", "Existing notes");
+  let opened = false;
+  file.getFile = async () => ({ size: 14, slice: () => ({ text: async () => { throw new Error("File unavailable"); } }) });
+  file.createWritable = async () => { opened = true; throw new Error("Must not open a writer"); };
+  app.handles.set("markdown", file);
+  const result = await app.send({ type: "SAVE_CLIP", destination: "markdown", clip });
+  assert.equal(result.fileWriteFailed, true);
+  assert.equal(result.savedLocally, true);
+  assert.equal(opened, false);
+  assert.equal(app.clips.size, 1);
+  assert.equal(file.text(), "Existing notes");
 });
 
 test("Google is selectable per annotation and never writes to a local file instead", async () => {

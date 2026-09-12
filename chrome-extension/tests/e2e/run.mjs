@@ -584,6 +584,33 @@ try {
   assert.equal((await send(options, { type: "GET_STATUS" })).count, beforeGoogle + 2);
   passed("Offline Google saves remain local, retry recovers them, and disconnect preserves notes (mocked Google services)");
 
+  for (const format of ["markdown", "txt"]) {
+    for (const ending of ["", "\n", "\n\n", "\r\n", "\r\n\r\n"]) {
+      const original = `Existing paragraph 🙂${ending}`;
+      await options.evaluate(async ({ format, original }) => {
+        const directory = await navigator.storage.getDirectory();
+        const handle = await directory.getFileHandle(`Boundary.${format === "txt" ? "txt" : "md"}`, { create: true });
+        const writer = await handle.createWritable();
+        await writer.write(original);
+        await writer.close();
+        await AnswerClipperDatabase.putFileHandle(handle, format);
+      }, { format, original });
+      const result = await send(options, {
+        type: "SAVE_CLIP", destination: format,
+        clip: { id: `boundary-${format}-${JSON.stringify(ending)}`, quote: "Fresh excerpt", annotation: "Separate this note" },
+      });
+      assert.equal(result.savedTo, "default");
+      const text = await options.evaluate(async (format) => {
+        const handle = await AnswerClipperDatabase.getFileHandle(format);
+        return (await handle.getFile()).text();
+      }, format);
+      assert.ok(text.startsWith(original), "Existing bytes must not change");
+      const quote = format === "txt" ? "“Fresh excerpt”" : "> Fresh excerpt";
+      assert.ok(text.replace(/\r\n/g, "\n").startsWith(`Existing paragraph 🙂\n\n${quote}`));
+    }
+  }
+  passed("Existing Markdown and TXT files receive a blank-line separator through real browser file handles");
+
   if (captureScreenshots) {
     const destination = path.join(repositoryDir, "docs", "screenshots");
     await fs.mkdir(destination, { recursive: true });

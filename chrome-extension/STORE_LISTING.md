@@ -48,7 +48,7 @@ The extension supports standard text selections in top-level pages. It does not 
 
 - Host the privacy policy at a public URL
 - Prepare a 1280 x 800 or 640 x 400 feature screenshot
-- Prepare an optional 440 x 280 small promotional tile
+- Prepare a 440 x 280 small promotional tile
 - Register a Chrome Web Store developer account and enable two-step verification
 - Configure a Google OAuth client for the published extension ID and complete the applicable Google verification for the sensitive Docs scope
 - Accurately disclose local processing and optional user-directed transmission of annotations and source details to Google; do not claim that the Google-enabled extension makes no network requests

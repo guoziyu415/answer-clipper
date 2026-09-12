@@ -228,12 +228,18 @@ async function clearInbox() {
 
 async function appendToFile(handle, text, format = "markdown") {
   const file = await handle.getFile();
+  // Read only the final bytes: keep existing content intact and separate the
+  // new note from a paragraph even when the file has no trailing newline.
+  const tail = file.size ? await file.slice(Math.max(0, file.size - 4)).text() : "";
+  const newline = tail.endsWith("\r\n") ? "\r\n" : "\n";
+  const separator = /(?:\r\n|\n){2}$/.test(tail) ? "" : tail.endsWith("\n") ? newline : "\n\n";
   const writable = await handle.createWritable({ keepExistingData: true });
   try {
     if (file.size === 0) {
       await writable.write(format === "txt" ? "Answer Clipper\n\n" : "# Answer Clipper\n\n");
     } else {
       await writable.seek(file.size);
+      if (separator) await writable.write(separator);
     }
     await writable.write(text);
   } finally {

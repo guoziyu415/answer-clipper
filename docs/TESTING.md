@@ -38,6 +38,7 @@ The test follows Playwright's [Chrome extension testing guidance](https://playwr
 17. The settings export-format selector exports the entire inbox as plain text with quotation marks and short source titles instead of metadata labels and long URLs.
 18. Choosing TXT appends two annotations to its own real file handle, with one header, without touching the connected Markdown file.
 19. A Google destination that still needs setup explains the next action. Switching destinations keeps the draft; a failed Google save keeps the dialog and local backup instead of silently closing.
+20. Existing Markdown and TXT files with no trailing newline, a single newline, or a blank line receive separated entries without rewriting earlier text. Real browser file handles cover both LF and CRLF endings and non-ASCII text.
 
 Google browser tests use synthetic responses and a test-only token injected into the temporary service worker. They never contact a real Google account and do not represent live OAuth validation. See [Google Docs setup and validation](GOOGLE_DOCS.md).
 

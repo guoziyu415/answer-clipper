@@ -27,6 +27,8 @@ For an existing installation, use **Reload** on the extension card and refresh y
 
 The extension always keeps a local IndexedDB copy first. Markdown and TXT saves ask for a filename and location unless a reusable file for that format is connected in Settings. Each format has its own optional file; switching formats never appends TXT to your Markdown file. The popup and settings page export the inbox in either format.
 
+When appending to an existing file, the extension adds a missing blank-line separator without rewriting earlier content. Existing LF and CRLF blank lines are preserved.
+
 Exports focus on the excerpt and your annotation, with no repeated title, field labels, category, tags, or timestamp. Google Docs uses an indented quote with a small source hyperlink; Markdown uses a blockquote and titled link. TXT uses quotation marks and a short source title without a long URL. Full metadata and the complete source URL stay in the local inbox. Existing files and Google entries are not rewritten.
 
 Choose **Local inbox (export later)** to collect many annotations before exporting. If a file or Google write fails, your local copy and open draft remain available, with an error and the option to choose another destination. Canceling a download also preserves the local copy.
