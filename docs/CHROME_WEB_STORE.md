@@ -2,12 +2,12 @@
 
 ## Current submission and save regression
 
-Checked on September 12, 2026. Version 0.6.1 was submitted and the dashboard confirmed **Pending review**. Automatic publication after approval was selected. This is not an approved or public listing.
+Checked on September 12, 2026. At the maintainer's explicit request, the 0.6.1 review was canceled and replaced with version 0.6.2. The dashboard confirmed **Review canceled**, accepted package version **0.6.2**, then confirmed **Pending review** and **Item submitted** for the replacement. Automatic publication after approval remains selected. This is not an approved or public listing.
 
-After submission, the maintainer reported a real Google Docs save failure after loading the updated extension. The screenshot confirms that the local inbox backup succeeded while the Google operation failed; the server's precise rejection was hidden by the generic error message. Version 0.6.2 is a local repair candidate with explicit border reset objects, bounded error diagnostics, and a basic-format fallback for an explicitly rejected formatting request. The live Google result is **not yet verified**. Withdrawal of the 0.6.1 review has been requested from the maintainer, not performed. Do not call the issue resolved or submit the repair as tested until a real Google Docs write has been checked.
+After the initial submission, the maintainer reported a real Google Docs save failure after loading the updated extension. The screenshot confirms that the local inbox backup succeeded while the Google operation failed; the server's precise rejection was hidden by the generic error message. Version 0.6.2 is a repair candidate with explicit border reset objects, bounded error diagnostics, and a basic-format fallback for an explicitly rejected formatting request. The live Google result is **not yet verified**. The maintainer requested withdrawal and replacement after being informed of that limitation. The replacement's saved reviewer instructions explicitly disclose the unverified live repair and pending Google OAuth verification. Do not call the issue resolved until a real Google Docs write has been checked.
 
 - Extension ID: `mkdeklipbgfjoibioofimhcklfikgmgo`
-- Uploaded package version: `0.6.1`
+- Uploaded and submitted package version: `0.6.2`
 - [Maintainer dashboard](https://chrome.google.com/webstore/devconsole/b26ec47b-5262-4b44-806c-c1f1d6ef82dd/mkdeklipbgfjoibioofimhcklfikgmgo/edit)
 - Saved listing fields: English description, Tools category, English (United States), the 128 x 128 icon, two 1280 x 800 screenshots, homepage URL, support URL and privacy policy URL.
 - The source repository is public, including its existing commit history, with the maintainer's approval.
@@ -20,7 +20,7 @@ After submission, the maintainer reported a real Google Docs save failure after 
 - [Store screenshot capture](https://github.com/guoziyu415/answer-clipper/actions/runs/34688888427) passed all 20 browser checks and produced three 1280 x 800 RGB PNGs. The annotation and selection screenshots are suitable for the store; the settings screenshot only shows the top of the inbox section. The normal [CI run](https://github.com/guoziyu415/answer-clipper/actions/runs/34688870822) passed too.
 - [CI for the uploaded source](https://github.com/guoziyu415/answer-clipper/actions/runs/34688017676) passed, including 40 Chrome unit tests and 20 isolated browser checks. Google identity and API responses in those tests are mocked.
 
-The initial development-configured ZIP was replaced by `Answer-Clipper-Chrome-Web-Store-v0.6.1.zip`, SHA-256 `c573380f92bfdf3947dc728caf5af5ba87012e5b8e593eb0f576b51139101397`. The submitted package uses the store-specific public key and OAuth client. The earlier 43 passing unit tests did not catch the live Google save failure. Google verification and live external-account testing remain incomplete despite the maintainer-requested store submission.
+The withdrawn 0.6.1 package was `Answer-Clipper-Chrome-Web-Store-v0.6.1.zip`, SHA-256 `c573380f92bfdf3947dc728caf5af5ba87012e5b8e593eb0f576b51139101397`. Its replacement is `Answer-Clipper-Chrome-Web-Store-v0.6.2.zip`, SHA-256 `e198967801562898267e1f70afd558f5d24aa1180939168d6792883bc19258d0`. Both use the existing store-specific public key and OAuth client; neither changes the original local installation identity. The earlier 43 passing unit tests did not catch the live Google save failure. The 0.6.2 candidate has 49 passing automated checks, but Google verification and live external-account testing remain incomplete despite the maintainer-requested store submission.
 
 ## Preserve existing installation and store identities
 
@@ -42,7 +42,7 @@ Do not insert this public key into an existing user's unpacked development manif
 4. Supply the real OAuth demonstration video and submit the prepared homepage-ownership explanation and scope justification. Complete branding verification/publication and sensitive Google Docs scope verification. **In production** is not **Verified**; the dashboard still shows a 100-user cap for unapproved scopes.
 5. Validate Google login and saving with a real external account using the store identity. Check create/select, repeated appends and exports, failure recovery, and disconnect.
 6. Two store-sized screenshots, reviewer instructions and the three confirmed privacy certifications have been saved. Remove the reviewer instructions' Google caveat only after real authorization is ready.
-7. Resolve the reported save regression and verify the repair with a real Google Docs operation before replacing or resubmitting the package. Version 0.6.1 is pending review; successful submission and CI are not publication or approval.
+7. Verify the repair with a real Google Docs operation before declaring the save regression resolved. Version 0.6.1 was withdrawn and 0.6.2 is pending review at the maintainer's request; successful submission and CI are not proof of a successful live Google write, publication or approval.
 
 ## Prepared Google review material
 
