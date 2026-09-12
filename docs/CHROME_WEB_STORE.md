@@ -1,8 +1,10 @@
 # Chrome Web Store release preparation
 
-## Current draft
+## Current submission and save regression
 
-Checked on September 12, 2026. This is an unpublished draft, not a public listing.
+Checked on September 12, 2026. Version 0.6.1 was submitted and the dashboard confirmed **Pending review**. Automatic publication after approval was selected. This is not an approved or public listing.
+
+After submission, the maintainer reported a real Google Docs save failure after loading the updated extension. The screenshot confirms that the local inbox backup succeeded while the Google operation failed; the server's precise rejection was hidden by the generic error message. Version 0.6.2 is a local repair candidate with explicit border reset objects, bounded error diagnostics, and a basic-format fallback for an explicitly rejected formatting request. The live Google result is **not yet verified**. Withdrawal of the 0.6.1 review has been requested from the maintainer, not performed. Do not call the issue resolved or submit the repair as tested until a real Google Docs write has been checked.
 
 - Extension ID: `mkdeklipbgfjoibioofimhcklfikgmgo`
 - Uploaded package version: `0.6.1`
@@ -11,14 +13,14 @@ Checked on September 12, 2026. This is an unpublished draft, not a public listin
 - The source repository is public, including its existing commit history, with the maintainer's approval.
 - The English [homepage](https://guoziyu415.github.io/answer-clipper/) and [privacy policy](https://guoziyu415.github.io/answer-clipper/privacy.html) are publicly hosted on GitHub Pages. Both returned HTTP 200 after the successful [website deployment](https://github.com/guoziyu415/answer-clipper/actions/runs/34688870812).
 - Public support contact: `guoziyu415@gmail.com`, explicitly confirmed by the maintainer. Chrome now displays **Verified email address**.
-- Single-purpose description, downloads/storage/identity/host explanations, and the no-remote-code answer have been saved in the store draft. Data types disclosed: authentication information, personal communications, web history (saved source pages only), and website content. The three limited-use certifications still require the maintainer's confirmation.
+- Single-purpose description, downloads/storage/identity/host explanations, and the no-remote-code answer have been saved. Data types disclosed: authentication information, personal communications, web history (saved source pages only), and website content. The maintainer confirmed that notes stay locally or in the user's Google Docs, not in an operator database; the three limited-use certifications were saved before submission.
 - Google Branding now has the product icon, homepage, privacy policy and `guoziyu415.github.io` authorized domain. Google Search Console confirmed **Ownership verified** for the homepage URL-prefix property using the HTML meta tag. Keep this tag in `website/index.html`; this is not Google OAuth approval.
 - The existing `answer-clipper` Google project now displays **In production**. No new project or OAuth client was created for this transition. Automated branding verification failed with a homepage-ownership finding despite the verified Search Console URL-prefix property. An explanation requesting manual review is drafted, not submitted; URL-prefix verification must not be represented as ownership of the parent `github.io` domain.
-- The combined Google review form requires both a scope justification and a real YouTube demonstration. The justification is drafted in the existing project's Data Access page, but cannot be saved without the video URL. No real OAuth demonstration has been recorded or submitted. The store's saved test instructions now accurately say **In production**, with branding/scope review and live testing still pending.
+- The combined Google review form requires both a scope justification and a real YouTube demonstration. The justification is drafted in the existing project's Data Access page, but cannot be saved without the video URL. The maintainer supplied a real recording showing local-client authorization and a Google Docs write from an older build. It has not been uploaded or submitted, does not demonstrate the store client, and does not validate 0.6.1 or the 0.6.2 repair. Saved store test instructions explicitly disclose pending Google verification and the lack of a live store-client test.
 - [Store screenshot capture](https://github.com/guoziyu415/answer-clipper/actions/runs/34688888427) passed all 20 browser checks and produced three 1280 x 800 RGB PNGs. The annotation and selection screenshots are suitable for the store; the settings screenshot only shows the top of the inbox section. The normal [CI run](https://github.com/guoziyu415/answer-clipper/actions/runs/34688870822) passed too.
 - [CI for the uploaded source](https://github.com/guoziyu415/answer-clipper/actions/runs/34688017676) passed, including 40 Chrome unit tests and 20 isolated browser checks. Google identity and API responses in those tests are mocked.
 
-The initial development-configured ZIP was replaced by `Answer-Clipper-Chrome-Web-Store-v0.6.1.zip`, SHA-256 `c573380f92bfdf3947dc728caf5af5ba87012e5b8e593eb0f576b51139101397`. The replacement uses the store-specific public key and OAuth client. The local unit suite now has 43 passing tests, including three store-identity checks. Google verification, live external-account testing, and the other gates below are still required before submission.
+The initial development-configured ZIP was replaced by `Answer-Clipper-Chrome-Web-Store-v0.6.1.zip`, SHA-256 `c573380f92bfdf3947dc728caf5af5ba87012e5b8e593eb0f576b51139101397`. The submitted package uses the store-specific public key and OAuth client. The earlier 43 passing unit tests did not catch the live Google save failure. Google verification and live external-account testing remain incomplete despite the maintainer-requested store submission.
 
 ## Preserve existing installation and store identities
 
@@ -39,8 +41,8 @@ Do not insert this public key into an existing user's unpacked development manif
 3. The English homepage and privacy policy are live on GitHub Pages; public email and website URL-prefix ownership are verified. Preserve the verification meta tag and confirm that Google's OAuth review accepts the supplied site.
 4. Supply the real OAuth demonstration video and submit the prepared homepage-ownership explanation and scope justification. Complete branding verification/publication and sensitive Google Docs scope verification. **In production** is not **Verified**; the dashboard still shows a 100-user cap for unapproved scopes.
 5. Validate Google login and saving with a real external account using the store identity. Check create/select, repeated appends and exports, failure recovery, and disconnect.
-6. Two store-sized screenshots and reviewer instructions have been saved. Complete the three privacy certifications with the maintainer's confirmation. Remove the reviewer instructions' temporary Google release-gate note only after real authorization is ready.
-7. Confirm all dashboard requirements and submit for review only when ready. Draft creation and successful CI are not publication or approval.
+6. Two store-sized screenshots, reviewer instructions and the three confirmed privacy certifications have been saved. Remove the reviewer instructions' Google caveat only after real authorization is ready.
+7. Resolve the reported save regression and verify the repair with a real Google Docs operation before replacing or resubmitting the package. Version 0.6.1 is pending review; successful submission and CI are not publication or approval.
 
 ## Prepared Google review material
 

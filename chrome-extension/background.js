@@ -106,8 +106,9 @@ async function saveClip(rawClip, destination = "default") {
       if (!googleConnected || !googleDocument || !googleDocs.configured()) {
         throw new Error("Connect Google and choose a document in Settings, then retry. Your annotation is safe in the local inbox.");
       }
-      await googleDocs.append(googleDocument, [clip]);
-      return { ok: true, savedLocally: true, savedTo: "google", documentTitle: googleDocument.title };
+      const result = await googleDocs.append(googleDocument, [clip]);
+      return { ok: true, savedLocally: true, savedTo: "google", documentTitle: googleDocument.title,
+        ...(result.basicFormattingCount ? { message: `Saved to Google Docs: ${googleDocument.title} (basic formatting; Google rejected the styling).` } : {}) };
     } catch (error) {
       return {
         ok: true, savedLocally: true, savedTo: "inbox", googleWriteFailed: true,

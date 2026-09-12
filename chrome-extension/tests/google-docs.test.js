@@ -13,7 +13,7 @@ function harness() {
     } }],
   };
   const target = google.resolveTarget(document);
-  const state = { document, calls: [], writes: [], interactive: [], invalidated: 0, lostReply: false, conflict: false, unauthorized: false };
+  const state = { document, calls: [], writes: [], attempts: [], rejections: [], interactive: [], invalidated: 0, lostReply: false, conflict: false, unauthorized: false };
   const client = google.createClient({
     identity: {
       async getAuthToken({ interactive }) { state.interactive.push(interactive); return { token: "test-only-token", grantedScopes: [google.SCOPE] }; },
@@ -33,6 +33,8 @@ function harness() {
       if (options.method === "GET") return Response.json(document);
       const body = JSON.parse(options.body);
       if (!url.endsWith(":batchUpdate")) return Response.json({ documentId: document.documentId });
+      state.attempts.push(body);
+      if (state.rejections.length) return Response.json(state.rejections.shift(), { status: 400 });
       if (state.conflict) {
         state.conflict = false;
         document.revisionId = "revision-concurrent";
@@ -128,6 +130,75 @@ test("Docs source is a small native hyperlink, not a long URL or repeated field 
   assert.equal(inserted.text.slice(link.range.startIndex - inserted.location.index, link.range.endIndex - inserted.location.index), "Search 🙂 results");
   assert.equal(link.range.tabId, target.tabId);
   assert.equal(note.pageUrl, pageUrl);
+});
+
+test("paragraph border updates always supply complete non-transparent border objects", async () => {
+  const { client, state, target } = harness();
+  await client.append(target, [clip("borders")]);
+  let hidden = 0;
+  for (const request of state.writes[0].requests) {
+    const update = request.updateParagraphStyle;
+    if (!update) continue;
+    for (const field of update.fields.split(",").filter((name) => name.startsWith("border"))) {
+      const border = update.paragraphStyle[field];
+      assert.ok(border, `${field} must not be omitted while included in the field mask`);
+      assert.deepEqual(Object.keys(border).sort(), ["color", "dashStyle", "padding", "width"]);
+      assert.ok(border.color.color.rgbColor);
+      assert.equal(border.width.unit, "PT");
+      assert.equal(border.padding.unit, "PT");
+      assert.equal(border.dashStyle, "SOLID");
+      if (border.width.magnitude === 0) hidden++;
+    }
+  }
+  assert.equal(hidden, 5);
+});
+
+test("an explicit rejected formatting operation retries once with text and deduplication markers", async () => {
+  const { client, state, target } = harness();
+  state.rejections.push({ error: { status: "INVALID_ARGUMENT", message: "Invalid requests[3].updateParagraphStyle: invalid border" } });
+  assert.deepEqual(await client.append(target, [clip("fallback")]), { exported: 1, skipped: 0, basicFormattingCount: 1 });
+  assert.equal(state.attempts.length, 2);
+  assert.equal(state.writes.length, 1);
+  assert.deepEqual(state.writes[0].requests.map((request) => Object.keys(request)[0]), ["insertText", "createNamedRange"]);
+  assert.equal(state.calls.filter((call) => call.method === "GET").length, 2, "The document must be reread before retrying");
+  assert.equal(state.writes[0].requests[0].insertText.text, state.attempts[0].requests[0].insertText.text);
+  assert.deepEqual(await client.append(target, [clip("fallback")]), { exported: 0, skipped: 1 });
+});
+
+test("a formatting fallback with an uncertain response is not automatically sent again", async () => {
+  const { client, state, target } = harness();
+  state.rejections.push({ error: { status: "INVALID_ARGUMENT", message: "Invalid requests[4].updateTextStyle: invalid style" } });
+  state.lostReply = true;
+  await assert.rejects(client.append(target, [clip("uncertain-fallback")]), /local notes are safe/);
+  assert.equal(state.attempts.length, 2);
+  assert.equal(state.writes.length, 1);
+  assert.deepEqual(await client.append(target, [clip("uncertain-fallback")]), { exported: 0, skipped: 1 });
+});
+
+test("generic and non-formatting 400 errors are not retried or exposed as raw private data", async () => {
+  for (const message of ["Private document https://docs.google.com/document/d/private-id with secret note", "Invalid requests[0].insertText: secret note", "Invalid requests[999].updateParagraphStyle: secret note"]) {
+    const { client, state, target } = harness();
+    state.rejections.push({ error: { status: "INVALID_ARGUMENT", message } });
+    await assert.rejects(client.append(target, [clip("bad-request")]), (error) => {
+      assert.match(error.message, /HTTP 400; INVALID_ARGUMENT/);
+      assert.doesNotMatch(error.message, /secret note|private-id|https:/);
+      return true;
+    });
+    assert.equal(state.attempts.length, 1);
+    assert.equal(state.writes.length, 0);
+  }
+});
+
+test("a rejected basic retry stops without creating markers or reporting success", async () => {
+  const { client, state, target } = harness();
+  state.rejections.push(
+    { error: { status: "INVALID_ARGUMENT", message: "Invalid requests[3].updateParagraphStyle: invalid style" } },
+    { error: { status: "INVALID_ARGUMENT", message: "Invalid requests[0].insertText: invalid range" } },
+  );
+  await assert.rejects(client.append(target, [clip("rejected-fallback")]), /request 0: insertText/);
+  assert.equal(state.attempts.length, 2);
+  assert.equal(state.writes.length, 0);
+  assert.deepEqual(state.document.tabs[0].documentTab.namedRanges, {});
 });
 
 test("Docs removes unsupported controls before computing ranges and handles missing notes or sources", () => {

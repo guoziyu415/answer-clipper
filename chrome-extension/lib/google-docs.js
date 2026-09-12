@@ -75,7 +75,7 @@
     return `answer_clipper_${Array.from(new Uint8Array(hash), (value) => value.toString(16).padStart(2, "0")).join("")}`;
   }
 
-  function buildAppendBatch(document, target, entries) {
+  function buildAppendBatch(document, target, entries, { basicFormatting = false } = {}) {
     const tab = getTabs(document).find((item) => item.tabProperties.tabId === target.tabId);
     if (!tab) throw new Error("The selected tab was removed. Choose a document again.");
     if (!document.revisionId) throw new Error("Google did not return a document revision. Reconnect and try again.");
@@ -97,7 +97,15 @@
       const color = (red, green = red, blue = red) => ({ color: { rgbColor: { red, green, blue } } });
       requests.push({ insertText: { text, location: { index, tabId: target.tabId } } });
       requests.push({ createNamedRange: { name: entry.marker, range } });
+      if (basicFormatting) {
+        index += text.length;
+        separator = "";
+        continue;
+      }
       requests.push({ deleteParagraphBullets: { range: contentRange } });
+      // Paragraph borders are whole objects, not partial field-mask resets.
+      // Supply every property even when hiding an inherited border.
+      const noBorder = () => ({ color: color(0), width: pt(0), padding: pt(0), dashStyle: "SOLID" });
       // Reset inherited formatting only on the newly inserted paragraphs.
       requests.push({ updateParagraphStyle: {
         range: contentRange,
@@ -105,6 +113,8 @@
           namedStyleType: "NORMAL_TEXT", alignment: "START", lineSpacing: 115,
           spaceAbove: pt(0), spaceBelow: pt(8), indentStart: pt(0), indentEnd: pt(0), indentFirstLine: pt(0),
           keepWithNext: false, keepLinesTogether: false, pageBreakBefore: false,
+          borderLeft: noBorder(), borderRight: noBorder(), borderTop: noBorder(),
+          borderBottom: noBorder(), borderBetween: noBorder(),
         },
         fields: "namedStyleType,alignment,lineSpacing,spaceAbove,spaceBelow,indentStart,indentEnd,indentFirstLine,keepWithNext,keepLinesTogether,pageBreakBefore,borderLeft,borderRight,borderTop,borderBottom,borderBetween,shading",
       } });
@@ -167,13 +177,24 @@
       }
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
+        const apiMessage = typeof data.error?.message === "string" ? data.error.message : "";
+        const requestIndex = apiMessage.match(/\brequests\[(\d+)\]/)?.[1];
+        const failedRequest = requestIndex === undefined ? null : body?.requests?.[Number(requestIndex)];
+        const operation = failedRequest ? Object.keys(failedRequest)[0] : "";
+        const apiStatus = ["INVALID_ARGUMENT", "FAILED_PRECONDITION", "INTERNAL", "UNAVAILABLE"].includes(data.error?.status) ? data.error.status : "";
+        // Expose only codes and our own operation names, never the raw response,
+        // which can contain document text, URLs or other private information.
+        const diagnostic = [`HTTP ${response.status}`, apiStatus, operation ? `request ${requestIndex}: ${operation}` : ""].filter(Boolean).join("; ");
         let message = "Google could not complete this request. Your local notes are safe; retry from Settings.";
+        if (response.status === 400) message = "Google Docs rejected the save request. Your local notes are safe.";
         if (response.status === 401) message = "Your Google connection expired. Reconnect in Settings.";
         if (response.status === 403) message = "Google denied access. Check that the Docs API is enabled and you can edit this document.";
         if (response.status === 404) message = "This Google document is missing or unavailable to the connected account.";
         if (response.status === 429) message = "Google's request limit was reached. Wait a moment, then retry Export Inbox.";
-        const error = new Error(message);
-        error.revisionConflict = response.status === 400 && /revision/i.test(data.error?.message || "");
+        const error = new Error(`${message} (${diagnostic})`);
+        error.revisionConflict = response.status === 400 && /revision/i.test(apiMessage);
+        error.formattingRejected = response.status === 400 && !error.revisionConflict &&
+          ["updateParagraphStyle", "updateTextStyle", "deleteParagraphBullets"].includes(operation);
         throw error;
       }
       return data;
@@ -209,6 +230,7 @@
         }
         let exported = 0;
         let skipped = 0;
+        let basicFormattingCount = 0;
         while (entries.length) {
           const chunk = [];
           let size = 0;
@@ -218,9 +240,11 @@
             chunk.push(entry);
           }
           if (!chunk.length) throw new Error("An annotation is too large for Google Docs. Export it as Markdown instead.");
-          for (let attempt = 0; ; attempt++) {
+          let basicFormatting = false;
+          let revisionRetries = 0;
+          for (;;) {
             const document = await read(target.documentId);
-            const batch = buildAppendBatch(document, target, chunk);
+            const batch = buildAppendBatch(document, target, chunk, { basicFormatting });
             try {
               if (batch.requests.length) {
                 await api(`/${target.documentId}:batchUpdate`, {
@@ -229,15 +253,22 @@
               }
               exported += batch.pending.length;
               skipped += chunk.length - batch.pending.length;
+              if (basicFormatting) basicFormattingCount += batch.pending.length;
               break;
             } catch (error) {
-              // Only a rejected revision can be retried automatically. An uncertain
-              // write is checked against remote markers on the next explicit export.
-              if (!error.revisionConflict || attempt >= 2) throw error;
+              // Docs validates the whole batch atomically. Only an explicit 400
+              // naming a formatting operation permits a single basic-text retry.
+              // Reread first to retain revision guards and duplicate protection.
+              // Never retry an uncertain write, permission failure or generic 400.
+              if (error.formattingRejected && !basicFormatting) {
+                basicFormatting = true;
+                continue;
+              }
+              if (!error.revisionConflict || revisionRetries++ >= 2) throw error;
             }
           }
         }
-        return { exported, skipped };
+        return { exported, skipped, ...(basicFormattingCount ? { basicFormattingCount } : {}) };
       },
     };
   }

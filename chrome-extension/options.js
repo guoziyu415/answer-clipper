@@ -51,7 +51,7 @@ async function googleAction(payload, success) {
   try {
     const result = await chrome.runtime.sendMessage(payload);
     if (!result?.ok) throw new Error(result?.error || "Google Docs request failed.");
-    showMessage(success || `Added ${result.exported} annotations; ${result.skipped} already present.`);
+    showMessage(success || `Added ${result.exported} annotations; ${result.skipped} already present.${result.basicFormattingCount ? ` ${result.basicFormattingCount} saved with basic formatting because Google rejected the styling.` : ""}`);
   } catch (error) {
     showMessage(error.message, true);
   } finally {

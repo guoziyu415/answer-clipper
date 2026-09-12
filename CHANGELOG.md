@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.2 (Chrome extension; live verification pending)
+
+- Supply complete zero-width paragraph borders when resetting inherited Google Docs formatting
+- Retry with basic text and duplicate-protection markers only after Google explicitly rejects a formatting operation with HTTP 400; reread the document before retrying
+- Report when an annotation was saved with basic formatting instead of claiming that rich formatting succeeded
+- Show HTTP status, a bounded API status code, and the failed request type without exposing raw Google error responses
+- Preserve local notes, document selection, OAuth clients, and existing remote annotations
+- Prepared in response to a real Google Docs save failure in 0.6.1; automated regression checks do not establish that the live failure is resolved
+
+## 0.6.1 (Chrome extension)
+
+- Preserve blank-line separation when appending to existing local Markdown and TXT files
+- Prepare isolated Chrome Web Store packages without changing the local installation's identity
+
 ## 0.6.0 (Chrome extension)
 
 - Replaced record-style exports with compact excerpts, one annotation, and a short source title

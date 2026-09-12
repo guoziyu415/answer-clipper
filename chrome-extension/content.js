@@ -326,7 +326,7 @@
       setBusy(false);
       closeDialog();
       if (result.savedTo === "google") {
-        showToast(`Saved to Google Docs: ${result.documentTitle}`);
+        showToast(result.message || `Saved to Google Docs: ${result.documentTitle}`);
       } else if (result.savedTo === "default") {
         showToast(`Saved to ${result.fileName}`);
       } else if (result.savedTo === "download") {

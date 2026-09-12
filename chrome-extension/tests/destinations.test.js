@@ -30,7 +30,7 @@ function setup(initial = {}) {
       append: async (document, entries) => {
         if (state.cloudError) throw state.cloudError;
         cloudWrites.push({ document, entries });
-        return { exported: entries.length, skipped: 0 };
+        return { exported: entries.length, skipped: 0, ...(state.basicFormatting ? { basicFormattingCount: entries.length } : {}) };
       },
     }) },
     chrome: {
@@ -187,6 +187,19 @@ test("missing Google setup retains the clip and reports a cloud failure", async 
   assert.equal(app.clips.size, 1);
   assert.equal(app.cloudWrites.length, 0);
   assert.equal(app.downloads.length, 0);
+});
+
+test("a successful Google basic-format save is disclosed and retains the local backup", async () => {
+  const app = setup({ googleConnected: true, googleDocument: { title: "Notes" } });
+  app.state.basicFormatting = true;
+  const result = await app.send({ type: "SAVE_CLIP", destination: "google", clip });
+  assert.equal(result.savedTo, "google");
+  assert.equal(result.savedLocally, true);
+  assert.match(result.message, /basic formatting/);
+  assert.equal(app.clips.size, 1);
+  assert.equal(app.downloads.length, 0);
+  const exported = await app.send({ type: "GOOGLE_EXPORT" });
+  assert.equal(exported.basicFormattingCount, 1);
 });
 
 test("inbox-only saving and TXT batch export preserve all notes", async () => {
