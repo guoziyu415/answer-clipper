@@ -4,11 +4,17 @@
 
 The maintainer approved the new name **AnyAnnotate**. Chrome 0.6.3 prepares the new display name, export titles, settings, popup, and listing copy. The macOS app, optional MCP interface, README, and website source use the same brand. Existing screenshots and released archives retain their historical names.
 
-The dashboard was checked again on September 13 and still showed **Pending review** for the existing 0.6.2 submission under **Answer Clipper - Web Highlights & Notes**. No review was canceled and no renamed package or listing was submitted. Google OAuth branding has not been changed. Update the store package/listing and Google consent branding as a coordinated follow-up; do not describe the rename as live in those external systems yet.
+On September 13, the maintainer explicitly requested submission of the renamed version. The dashboard required cancellation of the existing review before accepting a new package. It confirmed **Review canceled** for 0.6.2, accepted **AnyAnnotate - Web Highlights & Notes**, version **0.6.3**, and then confirmed **Pending Review** and **Item submitted**. Automatic publication after approval remains selected. This is a submitted review, not an approved or published listing. Google OAuth branding has not been changed.
+
+Uploaded archive: `AnyAnnotate-Chrome-Web-Store-v0.6.3.zip`, SHA-256 `2fca3a6f77741203d8c738b8a11b543d60bfc7d26d7a7cfbf161cbebfee2d533`. The title came from the accepted package. The English description was renamed and includes a notice about previous-name screenshots and Google consent branding. Existing permissions, category, language, links, icons, and screenshots were retained. [CI for the renamed source](https://github.com/guoziyu415/answer-clipper/actions/runs/34733031415) passed.
+
+Saved reviewer instructions (499 of 500 characters):
+
+> 0.6.3 renames Answer Clipper to AnyAnnotate; same extension ID and OAuth clients. Local: on HTTP/HTTPS, select text > Annotate > add note > choose Markdown/TXT/Local inbox > Save. Optional Google Docs: Settings > Connect Google > create a Doc or paste its URL, then save/export. OAuth branding/scope verification is pending; consent may show Answer Clipper. The 0.6.2 Google-save repair has automated checks; live store-client verification remains incomplete. Existing screenshots show the old name.
 
 Repository and Pages URLs, both existing OAuth clients, the store ID/public key, the macOS bundle ID, local storage/database keys, existing file locations, and Google Docs deduplication markers are deliberately unchanged. User-created document titles and existing notes are not renamed. The homepage and privacy policy explain the previous name so reviewers and users can recognize both brands.
 
-## Current submission and save regression
+## Previous 0.6.2 submission and save regression
 
 Checked on September 12, 2026. At the maintainer's explicit request, the 0.6.1 review was canceled and replaced with version 0.6.2. The dashboard confirmed **Review canceled**, accepted package version **0.6.2**, then confirmed **Pending review** and **Item submitted** for the replacement. Automatic publication after approval remains selected. This is not an approved or public listing.
 

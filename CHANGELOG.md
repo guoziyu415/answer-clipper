@@ -1,12 +1,13 @@
 # Changelog
 
-## 0.6.3 (AnyAnnotate rename; not submitted to the Chrome Web Store)
+## 0.6.3 (AnyAnnotate rename; Chrome Web Store review pending)
 
 - Rename the product from Answer Clipper to AnyAnnotate across Chrome, macOS, the optional MCP interface, documentation, and website source
 - Use AnyAnnotate for new export headings, suggested filenames, and new Google Doc titles without rewriting existing user content
 - Preserve installation identities, OAuth clients, storage keys, existing file locations, and Google Docs duplicate-protection markers
 - Keep repository URLs, historical downloads, and screenshots compatible, and document the previous name during the transition
-- Leave the existing 0.6.2 Chrome Web Store review and Google OAuth branding unchanged
+- Replace the withdrawn 0.6.2 review with AnyAnnotate 0.6.3 on September 13, 2026; automatic publication after approval remains enabled
+- Leave existing Google OAuth branding unchanged and disclose the previous name during the transition
 
 ## 0.6.2 (Chrome extension; live verification pending)
 

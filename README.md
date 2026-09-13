@@ -1,6 +1,6 @@
 # AnyAnnotate
 
-Previously **Answer Clipper**. The name is changing, not your notes or accounts. Repository links, installation identities, and existing storage locations stay the same. Chrome 0.6.2 is still under review with the old name; the renamed 0.6.3 build has not been submitted. Older downloads and screenshots retain the previous branding.
+Previously **Answer Clipper**. The name is changing, not your notes or accounts. Repository links, installation identities, and existing storage locations stay the same. AnyAnnotate 0.6.3 was submitted to the Chrome Web Store on September 13, 2026, replacing the withdrawn 0.6.2 review. It is pending review, with automatic publication after approval. Older downloads and screenshots retain the previous branding.
 
 AnyAnnotate is a local-first annotation tool for keeping the parts of an article, document, or AI answer that matter. Select text, add a note, and choose Google Docs, Markdown, plain text, or a local inbox without interrupting your reading flow.
 
