@@ -59,7 +59,7 @@ final class NoteStore {
         let directory = url.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         if !FileManager.default.fileExists(atPath: url.path) {
-            try "# Answer Clipper\n\n".write(to: url, atomically: true, encoding: .utf8)
+            try "# AnyAnnotate\n\n".write(to: url, atomically: true, encoding: .utf8)
         }
     }
 

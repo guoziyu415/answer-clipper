@@ -33,7 +33,7 @@ jobs:
         run: |
           node scripts/package-chrome-store.mjs
           mkdir -p "$RUNNER_TEMP/answer-clipper-store-test"
-          unzip -q dist/Answer-Clipper-Chrome-Web-Store-*.zip -d "$RUNNER_TEMP/answer-clipper-store-test"
+          unzip -q dist/AnyAnnotate-Chrome-Web-Store-*.zip -d "$RUNNER_TEMP/answer-clipper-store-test"
       - name: Record and verify real local saving
         if: ${{ inputs.live_recording }}
         run: |

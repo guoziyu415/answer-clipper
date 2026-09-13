@@ -1,6 +1,6 @@
-# Answer Clipper Plugin
+# AnyAnnotate Plugin
 
-Answer Clipper is a local-only MCP app with an in-chat interface. It can also be used as a Codex plugin from this repository. The workspace collects multiple excerpts, adds annotations, changes their order, and exports files. Buttons and inputs call server tools directly, so each edit does not create another chat turn.
+AnyAnnotate is a local-only MCP app with an in-chat interface. It can also be used as a Codex plugin from this repository. The workspace collects multiple excerpts, adds annotations, changes their order, and exports files. Buttons and inputs call server tools directly, so each edit does not create another chat turn.
 
 ## Implemented features
 
@@ -40,7 +40,7 @@ ChatGPT must be able to reach the MCP endpoint over HTTPS. For local development
 https://your-domain.example/mcp
 ```
 
-After connecting, ask ChatGPT to `Open Answer Clipper` to mount the workspace. Once it is open, adding, annotating, reordering, deleting, and exporting can be completed inside the interface.
+After connecting, ask ChatGPT to `Open AnyAnnotate` to mount the workspace. Once it is open, adding, annotating, reordering, deleting, and exporting can be completed inside the interface.
 
 Secure MCP Tunnel is for private developer-mode testing. Do not publish or share the tunnel URL.
 

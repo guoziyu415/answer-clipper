@@ -6,7 +6,7 @@ function cleanFilename(value: string): string {
     .replace(/[\\/:*?"<>|]/g, "-")
     .replace(/\s+/g, " ")
     .slice(0, 80);
-  return cleaned || "Answer Clipper";
+  return cleaned || "AnyAnnotate";
 }
 
 function quoteMarkdown(value: string): string {

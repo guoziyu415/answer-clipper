@@ -1,5 +1,13 @@
 # Chrome Web Store release preparation
 
+## AnyAnnotate rename (September 13, 2026)
+
+The maintainer approved the new name **AnyAnnotate**. Chrome 0.6.3 prepares the new display name, export titles, settings, popup, and listing copy. The macOS app, optional MCP interface, README, and website source use the same brand. Existing screenshots and released archives retain their historical names.
+
+The dashboard was checked again on September 13 and still showed **Pending review** for the existing 0.6.2 submission under **Answer Clipper - Web Highlights & Notes**. No review was canceled and no renamed package or listing was submitted. Google OAuth branding has not been changed. Update the store package/listing and Google consent branding as a coordinated follow-up; do not describe the rename as live in those external systems yet.
+
+Repository and Pages URLs, both existing OAuth clients, the store ID/public key, the macOS bundle ID, local storage/database keys, existing file locations, and Google Docs deduplication markers are deliberately unchanged. User-created document titles and existing notes are not renamed. The homepage and privacy policy explain the previous name so reviewers and users can recognize both brands.
+
 ## Current submission and save regression
 
 Checked on September 12, 2026. At the maintainer's explicit request, the 0.6.1 review was canceled and replaced with version 0.6.2. The dashboard confirmed **Review canceled**, accepted package version **0.6.2**, then confirmed **Pending review** and **Item submitted** for the replacement. Automatic publication after approval remains selected. This is not an approved or public listing.

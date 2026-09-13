@@ -3,7 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { Clip, ClipChanges, ClipInput, DraftState } from "./types.js";
 
-const DEFAULT_TITLE = "Answer Clipper";
+const DEFAULT_TITLE = "AnyAnnotate";
 
 function now(): string {
   return new Date().toISOString();

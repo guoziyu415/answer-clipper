@@ -1,6 +1,6 @@
-# Answer Clipper for Chrome
+# AnyAnnotate for Chrome
 
-Answer Clipper lets you select text from articles, documentation, blogs, and AI conversations, add an annotation, and save it locally without interrupting your reading.
+AnyAnnotate lets you select text from articles, documentation, blogs, and AI conversations, add an annotation, and save it locally without interrupting your reading.
 
 ![The running extension's annotation dialog](../docs/screenshots/chrome-annotation.png)
 

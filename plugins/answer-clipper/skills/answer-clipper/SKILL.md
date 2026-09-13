@@ -1,9 +1,9 @@
 ---
 name: answer-clipper
-description: Open and use the Answer Clipper workspace when the user wants to collect, annotate, organize, or export useful excerpts without extending the conversation for each edit.
+description: Open and use the AnyAnnotate workspace when the user wants to collect, annotate, organize, or export useful excerpts without extending the conversation for each edit.
 ---
 
-# Answer Clipper
+# AnyAnnotate
 
 Use `open_answer_clipper` when the user wants to view or manage their excerpt draft. The returned interactive workspace handles annotation, editing, ordering, deletion, and export directly; do not ask the user to repeat those edits in the chat.
 

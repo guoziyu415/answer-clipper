@@ -14,7 +14,7 @@ const manifest = prepareStoreManifest(developmentManifest, config);
 if (!/^\d+(?:\.\d+){0,3}$/.test(manifest.version)) throw new Error("Invalid extension version.");
 const dist = path.join(root, "dist");
 await fs.mkdir(dist, { recursive: true });
-const archive = path.join(dist, `Answer-Clipper-Chrome-Web-Store-v${manifest.version}.zip`);
+const archive = path.join(dist, `AnyAnnotate-Chrome-Web-Store-v${manifest.version}.zip`);
 if (await fs.stat(archive).catch((error) => { if (error.code !== "ENOENT") throw error; })) {
   throw new Error("The store archive already exists. Preserve it and increment the extension version before creating another package.");
 }

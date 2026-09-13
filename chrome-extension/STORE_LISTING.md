@@ -2,7 +2,7 @@
 
 ## Name
 
-Answer Clipper - Web Highlights & Notes
+AnyAnnotate - Web Highlights & Notes
 
 ## Short description
 
@@ -10,7 +10,7 @@ Highlight web text, add annotations, and save to Google Docs, Markdown, plain te
 
 ## Detailed description
 
-Answer Clipper helps you keep the parts of an article, blog, reference page, or AI answer that matter. It works on ordinary HTTP and HTTPS web pages, including ChatGPT.
+AnyAnnotate helps you keep the parts of an article, blog, reference page, or AI answer that matter. It works on ordinary HTTP and HTTPS web pages, including ChatGPT.
 
 After you select text, an **Annotate** button appears beside the selection. Add a thought, question, verification note, highlight, or tags. Choose Google Docs, Markdown, TXT, or the local inbox directly in the annotation dialog, then click its single Save button. The last saved choice is remembered. The extension never sends a message to the chat or creates another conversation turn.
 

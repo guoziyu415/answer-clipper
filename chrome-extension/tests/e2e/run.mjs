@@ -265,7 +265,7 @@ try {
     return download.filename;
   });
   const markdown = await fs.readFile(exportPath, "utf8");
-  assert.ok(markdown.startsWith("# Answer Clipper\n\n"));
+  assert.ok(markdown.startsWith("# AnyAnnotate\n\n"));
   assert.ok(markdown.includes(quote) && markdown.includes(annotation));
   assert.doesNotMatch(markdown, /\*\*Tags:|\*\*Category:|\*\*Time:|\*\*Link:|\*\*Annotation:/);
   for (const url of readingURLs) assert.ok(markdown.includes(`](<${url}>)`));
@@ -289,7 +289,7 @@ try {
     return (await handle.getFile()).text();
   });
   assert.ok(fileContents.includes("First file entry") && fileContents.includes("Second file entry"));
-  assert.equal((fileContents.match(/^# Answer Clipper$/gm) || []).length, 1);
+  assert.equal((fileContents.match(/^# AnyAnnotate$/gm) || []).length, 1);
   passed("Default-file writes append both entries using a real browser file handle");
 
   await context.close();
@@ -472,7 +472,7 @@ try {
   const textExport = await downloadedSince(previousExport);
   const textExportBody = await fs.readFile(textExport.filename, "utf8");
   assert.equal(path.extname(textExport.filename), ".txt");
-  assert.ok(textExportBody.startsWith("Answer Clipper\n\n"));
+  assert.ok(textExportBody.startsWith("AnyAnnotate\n\n"));
   assert.equal((textExportBody.match(/^--------------------$/gm) || []).length, beforeChoices + 2);
   passed("The settings export selector downloads the entire inbox as plain text");
 
@@ -495,7 +495,7 @@ try {
     const md = await AnswerClipperDatabase.getFileHandle("markdown");
     return { txt: await (await txt.getFile()).text(), md: await (await md.getFile()).text() };
   });
-  assert.equal((appendText.txt.match(/^Answer Clipper$/gm) || []).length, 1);
+  assert.equal((appendText.txt.match(/^AnyAnnotate$/gm) || []).length, 1);
   assert.equal((appendText.txt.match(/^--------------------$/gm) || []).length, 2);
   assert.equal(appendText.md, "", "TXT saves must not touch the Markdown file");
   passed("Selecting TXT appends to its own real file handle without changing the Markdown file");

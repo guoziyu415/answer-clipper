@@ -100,7 +100,7 @@ test("switching formats appends only to the matching connected file", async () =
   app.handles.set("txt", txt);
   await app.send({ type: "SAVE_CLIP", destination: "txt", clip });
   assert.equal(md.text(), "Existing Markdown\n");
-  assert.ok(txt.text().startsWith("Answer Clipper\n\n“Keep this sentence"));
+  assert.ok(txt.text().startsWith("AnyAnnotate\n\n“Keep this sentence"));
   const previousText = txt.text();
   await app.send({ type: "SAVE_CLIP", destination: "markdown", clip: { ...clip, id: "clip-2" } });
   assert.equal(txt.text(), previousText);
@@ -210,7 +210,7 @@ test("inbox-only saving and TXT batch export preserve all notes", async () => {
   const result = await app.send({ type: "EXPORT_INBOX", format: "txt" });
   assert.equal(result.count, 2);
   assert.match(app.downloads[0].filename, /\.txt$/);
-  assert.match(decodeURIComponent(app.downloads[0].url), /Answer Clipper\n\n“Keep this sentence/);
+  assert.match(decodeURIComponent(app.downloads[0].url), /AnyAnnotate\n\n“Keep this sentence/);
   assert.equal(app.clips.size, 2);
 });
 

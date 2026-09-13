@@ -217,7 +217,7 @@ async function exportInbox(format = "markdown") {
   }
   inbox.sort((left, right) => String(left.createdAt).localeCompare(String(right.createdAt)));
   const text = format === "txt" ? AnswerClipperMarkdown.formatTextDocument(inbox) : AnswerClipperMarkdown.formatDocument(inbox);
-  await downloadFile(text, `AnswerClipper-Inbox-${dateStamp()}.${format === "txt" ? "txt" : "md"}`, format);
+  await downloadFile(text, `AnyAnnotate-Inbox-${dateStamp()}.${format === "txt" ? "txt" : "md"}`, format);
   return { ok: true, count: inbox.length };
 }
 
@@ -237,7 +237,7 @@ async function appendToFile(handle, text, format = "markdown") {
   const writable = await handle.createWritable({ keepExistingData: true });
   try {
     if (file.size === 0) {
-      await writable.write(format === "txt" ? "Answer Clipper\n\n" : "# Answer Clipper\n\n");
+      await writable.write(format === "txt" ? "AnyAnnotate\n\n" : "# AnyAnnotate\n\n");
     } else {
       await writable.seek(file.size);
       if (separator) await writable.write(separator);
@@ -258,7 +258,7 @@ function createEntryFilename(clip, format = "markdown") {
   const title = (clip.annotation.split(/\r?\n/).find(Boolean) || clip.kind)
     .replace(/[\\/:*?"<>|]/g, "-")
     .slice(0, 36);
-  return `AnswerClipper-${dateStamp()}-${title}.${format === "txt" ? "txt" : "md"}`;
+  return `AnyAnnotate-${dateStamp()}-${title}.${format === "txt" ? "txt" : "md"}`;
 }
 
 function dateStamp() {

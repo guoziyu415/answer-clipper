@@ -59,14 +59,14 @@ export function createMcpServer(): McpServer {
     server,
     "open_answer_clipper",
     {
-      title: "Open Answer Clipper",
+      title: "Open AnyAnnotate",
       description:
-        "Open the interactive Answer Clipper workspace. Use it when the user wants to collect, review, annotate, reorder, delete, or export answer excerpts without adding more chat messages for every edit.",
+        "Open the interactive AnyAnnotate workspace. Use it when the user wants to collect, review, annotate, reorder, delete, or export answer excerpts without adding more chat messages for every edit.",
       inputSchema: {},
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
       _meta: { ui: { resourceUri: WIDGET_URI } },
     },
-    async () => draftResult(store.read(), "Opened the Answer Clipper workspace.")
+    async () => draftResult(store.read(), "Opened the AnyAnnotate workspace.")
   );
 
   registerAppTool(
@@ -75,7 +75,7 @@ export function createMcpServer(): McpServer {
     {
       title: "Add Answer Clip",
       description:
-        "Add one exact excerpt to Answer Clipper and open the workspace. Use only when the user clearly identifies text they want to keep.",
+        "Add one exact excerpt to AnyAnnotate and open the workspace. Use only when the user clearly identifies text they want to keep.",
       inputSchema: {
         id: identifier.describe("A stable request ID used to prevent duplicate inserts on retries."),
         ...clipFields,
@@ -89,7 +89,7 @@ export function createMcpServer(): McpServer {
       _meta: { ui: { resourceUri: WIDGET_URI } },
     },
     async (input) =>
-      draftResult(store.append(input), "Added one excerpt and opened the Answer Clipper workspace.")
+      draftResult(store.append(input), "Added one excerpt and opened the AnyAnnotate workspace.")
   );
 
   const appOnlyMeta = { ui: { visibility: ["app" as const] } };
@@ -99,7 +99,7 @@ export function createMcpServer(): McpServer {
     "draft_get",
     {
       title: "Read Draft",
-      description: "Read the current Answer Clipper draft for the mounted app.",
+      description: "Read the current AnyAnnotate draft for the mounted app.",
       inputSchema: {},
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
       _meta: appOnlyMeta,
@@ -112,7 +112,7 @@ export function createMcpServer(): McpServer {
     "draft_set_title",
     {
       title: "Set Draft Title",
-      description: "Set the export title for the mounted Answer Clipper app.",
+      description: "Set the export title for the mounted AnyAnnotate app.",
       inputSchema: { title: z.string().max(200) },
       annotations: {
         readOnlyHint: false,
@@ -130,7 +130,7 @@ export function createMcpServer(): McpServer {
     "draft_append",
     {
       title: "Append Clip",
-      description: "Append an excerpt from the mounted Answer Clipper app.",
+      description: "Append an excerpt from the mounted AnyAnnotate app.",
       inputSchema: { id: identifier, ...clipFields },
       annotations: {
         readOnlyHint: false,
@@ -148,7 +148,7 @@ export function createMcpServer(): McpServer {
     "draft_update",
     {
       title: "Update Clip",
-      description: "Update one excerpt from the mounted Answer Clipper app.",
+      description: "Update one excerpt from the mounted AnyAnnotate app.",
       inputSchema: {
         id: identifier,
         quote: z.string().trim().min(1).max(50_000).optional(),
@@ -173,7 +173,7 @@ export function createMcpServer(): McpServer {
     "draft_delete",
     {
       title: "Delete Clip",
-      description: "Delete one excerpt from the mounted Answer Clipper app.",
+      description: "Delete one excerpt from the mounted AnyAnnotate app.",
       inputSchema: { id: identifier },
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
       _meta: appOnlyMeta,
@@ -186,7 +186,7 @@ export function createMcpServer(): McpServer {
     "draft_move",
     {
       title: "Move Clip",
-      description: "Move one excerpt to an exact position in the mounted Answer Clipper app.",
+      description: "Move one excerpt to an exact position in the mounted AnyAnnotate app.",
       inputSchema: { id: identifier, toIndex: z.number().int().min(0).max(100_000) },
       annotations: {
         readOnlyHint: false,
@@ -204,7 +204,7 @@ export function createMcpServer(): McpServer {
     "draft_clear",
     {
       title: "Clear Draft",
-      description: "Delete all excerpts from the mounted Answer Clipper app.",
+      description: "Delete all excerpts from the mounted AnyAnnotate app.",
       inputSchema: {},
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
       _meta: appOnlyMeta,
@@ -217,7 +217,7 @@ export function createMcpServer(): McpServer {
     "draft_export",
     {
       title: "Export Draft",
-      description: "Render the mounted Answer Clipper draft as Markdown or plain text.",
+      description: "Render the mounted AnyAnnotate draft as Markdown or plain text.",
       inputSchema: { format: z.enum(["md", "txt"]) },
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
       _meta: appOnlyMeta,
@@ -230,7 +230,7 @@ export function createMcpServer(): McpServer {
 
   registerAppResource(
     server,
-    "Answer Clipper workspace",
+    "AnyAnnotate workspace",
     WIDGET_URI,
     {
       mimeType: RESOURCE_MIME_TYPE,
@@ -331,7 +331,7 @@ const host = process.env.HOST ?? "127.0.0.1";
 
 export function validateHost(value: string): string {
   if (!["127.0.0.1", "localhost", "::1"].includes(value)) {
-    throw new Error("Answer Clipper is local-only. HOST must be a loopback address.");
+    throw new Error("AnyAnnotate is local-only. HOST must be a loopback address.");
   }
   return value;
 }
@@ -342,7 +342,7 @@ export function startHttpServer() {
     throw new Error("PORT must be an integer between 1 and 65535.");
   }
   return createHttpApp().listen(port, safeHost, () => {
-    console.log(`Answer Clipper MCP App listening at http://${safeHost}:${port}/mcp`);
+    console.log(`AnyAnnotate MCP App listening at http://${safeHost}:${port}/mcp`);
     console.log(`Local preview: http://${safeHost}:${port}/preview`);
   });
 }

@@ -51,7 +51,7 @@
 
   function formatDocument(clips) {
     const entries = Array.isArray(clips) ? clips.map(formatEntry).join("") : "";
-    return `# Answer Clipper\n\n${entries}`;
+    return `# AnyAnnotate\n\n${entries}`;
   }
 
   function formatTextEntry(rawClip) {
@@ -66,7 +66,7 @@
   }
 
   function formatTextDocument(clips) {
-    return `Answer Clipper\n\n${Array.isArray(clips) ? clips.map(formatTextEntry).join("") : ""}`;
+    return `AnyAnnotate\n\n${Array.isArray(clips) ? clips.map(formatTextEntry).join("") : ""}`;
   }
 
   function getNoteContent(rawClip) {

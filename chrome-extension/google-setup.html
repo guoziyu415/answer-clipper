@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Google Docs setup - Answer Clipper</title>
+  <title>Google Docs setup - AnyAnnotate</title>
   <link rel="stylesheet" href="settings.css">
 </head>
 <body>
@@ -18,7 +18,7 @@
         <li>Add the scope <code>https://www.googleapis.com/auth/documents</code>. This is a sensitive scope; public distribution requires Google's applicable verification.</li>
         <li>Create an OAuth client of type <strong>Chrome Extension</strong> with the extension ID shown on its card in <code>chrome://extensions</code>.</li>
         <li>From the repository root, run <code>node scripts/configure-google-oauth.mjs YOUR_CLIENT_ID.apps.googleusercontent.com</code>.</li>
-        <li>Reload Answer Clipper in <code>chrome://extensions</code>, reopen Settings, and select Connect Google.</li>
+        <li>Reload AnyAnnotate in <code>chrome://extensions</code>, reopen Settings, and select Connect Google.</li>
       </ol>
       <p>No client secret or API key is needed. Keep the extension ID stable; the OAuth client must match the loaded extension.</p>
     </section>

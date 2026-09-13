@@ -71,7 +71,7 @@ async function chooseFile() {
   const format = fileFormat.value;
   try {
     const handle = await window.showSaveFilePicker({
-      suggestedName: `AnswerClipper-Inbox.${format === "txt" ? "txt" : "md"}`,
+      suggestedName: `AnyAnnotate-Inbox.${format === "txt" ? "txt" : "md"}`,
       excludeAcceptAllOption: true,
       types: format === "txt"
         ? [{ description: "Plain text file", accept: { "text/plain": [".txt"] } }]
@@ -169,7 +169,7 @@ async function ensureHeader(handle, format) {
   if (file.size > 0) return;
   const writable = await handle.createWritable();
   try {
-    await writable.write(format === "txt" ? "Answer Clipper\n\n" : "# Answer Clipper\n\n");
+    await writable.write(format === "txt" ? "AnyAnnotate\n\n" : "# AnyAnnotate\n\n");
   } finally {
     await writable.close();
   }

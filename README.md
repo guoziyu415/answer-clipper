@@ -1,6 +1,8 @@
-# Answer Clipper
+# AnyAnnotate
 
-Answer Clipper is a local-first annotation tool for keeping the parts of an article, document, or AI answer that matter. Select text, add a note, and choose Google Docs, Markdown, plain text, or a local inbox without interrupting your reading flow.
+Previously **Answer Clipper**. The name is changing, not your notes or accounts. Repository links, installation identities, and existing storage locations stay the same. Chrome 0.6.2 is still under review with the old name; the renamed 0.6.3 build has not been submitted. Older downloads and screenshots retain the previous branding.
+
+AnyAnnotate is a local-first annotation tool for keeping the parts of an article, document, or AI answer that matter. Select text, add a note, and choose Google Docs, Markdown, plain text, or a local inbox without interrupting your reading flow.
 
 The project includes a macOS app for system-wide annotation, a Chrome extension for ordinary web pages, and an experimental local-only MCP app. All product UI, messages, exports, tests, and documentation are written in English.
 
@@ -53,11 +55,11 @@ The macOS app works with ChatGPT Desktop, browsers, PDF readers, and other appli
 
 ### Install a release
 
-1. Download the latest `Answer-Clipper-macOS-vX.Y.Z.zip` from GitHub Releases.
-2. Unzip it and move `Answer Clipper.app` to `Applications`.
+1. Download a macOS archive from GitHub Releases. Older releases retain the `Answer-Clipper-macOS-` prefix and `Answer Clipper.app` name; new builds use `AnyAnnotate-macOS-` and `AnyAnnotate.app`.
+2. Unzip it and move the included app to `Applications`.
 3. Open the app. If macOS blocks the first launch, right-click the app, choose **Open**, and confirm.
 4. Select **Accessibility Permission...** from the highlighter icon in the menu bar.
-5. Enable Answer Clipper in **System Settings > Privacy & Security > Accessibility**.
+5. Enable AnyAnnotate (or Answer Clipper for an older release) in **System Settings > Privacy & Security > Accessibility**.
 6. Select text in any supported app and click the floating **Annotate** button.
 7. Add a note and press `Command-Enter` to save.
 
@@ -71,7 +73,7 @@ Install Xcode Command Line Tools or Xcode, then run:
 ./scripts/build-app.sh
 ```
 
-Open `build/Answer Clipper.app` and grant Accessibility permission when prompted.
+Open `build/AnyAnnotate.app` and grant Accessibility permission when prompted.
 
 To regenerate the macOS icon from the shared SVG source:
 
@@ -191,8 +193,8 @@ Category, tags, timestamps, and the complete source URL remain in the local inbo
 
 ## Privacy
 
-Answer Clipper does not call an AI model or create new chat messages. Local saving keeps data in browser storage or a user-selected Markdown or TXT file. If you opt into Google Docs, annotations and source details are sent directly to Google's Docs API; no Answer Clipper server receives them. Chrome manages OAuth tokens, and the app never returns them to web pages. The macOS app writes only to the selected Markdown file.
+AnyAnnotate does not call an AI model or create new chat messages. Local saving keeps data in browser storage or a user-selected Markdown or TXT file. If you opt into Google Docs, annotations and source details are sent directly to Google's Docs API; no AnyAnnotate server receives them. Chrome manages OAuth tokens, and the app never returns them to web pages. The macOS app writes only to the selected Markdown file.
 
 ## License
 
-Answer Clipper is available under the [MIT License](LICENSE).
+AnyAnnotate is available under the [MIT License](LICENSE).

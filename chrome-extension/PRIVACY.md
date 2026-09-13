@@ -1,8 +1,10 @@
-# Answer Clipper Privacy Policy
+# AnyAnnotate Privacy Policy
+
+AnyAnnotate was previously called Answer Clipper. This policy covers both names. Existing releases and the Google consent screen may still show Answer Clipper during the transition. The rename does not change data handling or permissions.
 
 Last updated: September 12, 2026
 
-Answer Clipper has one purpose: to let users select text on web pages, add an annotation, and save that content to a destination they choose.
+AnyAnnotate has one purpose: to let users select text on web pages, add an annotation, and save that content to a destination they choose.
 
 ## Data handling
 
@@ -28,11 +30,11 @@ Users can clear the local inbox from the extension popup or settings page. Unins
 
 **Disconnect Google** clears this extension's cached Google authorization and its selected cloud destination, then returns new saves to local mode. Google documents already created or updated remain in the account. Users can also revoke the app's access through [Google Account connections](https://myaccount.google.com/connections).
 
-Local notes and settings remain on your device until you clear them or uninstall the extension. Exported files and Google documents remain until you delete them in their respective locations. Answer Clipper does not apply its own encryption to local notes or exported files; use your device's security controls to protect them. Requests to Google's API use HTTPS.
+Local notes and settings remain on your device until you clear them or uninstall the extension. Exported files and Google documents remain until you delete them in their respective locations. AnyAnnotate does not apply its own encryption to local notes or exported files; use your device's security controls to protect them. Requests to Google's API use HTTPS.
 
 ## Limited use of Google data
 
-Answer Clipper's use and transfer of information received from Google APIs adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including its Limited Use requirements. It uses Google data only to provide the document-saving features you choose. It does not sell Google data, use it for advertising, credit or lending decisions, or transfer it for unrelated purposes. The maintainer cannot access your notes or Google documents through the extension.
+AnyAnnotate's use and transfer of information received from Google APIs adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including its Limited Use requirements. It uses Google data only to provide the document-saving features you choose. It does not sell Google data, use it for advertising, credit or lending decisions, or transfer it for unrelated purposes. The maintainer cannot access your notes or Google documents through the extension.
 
 The extension handles user data solely for its described annotation and saving purpose, consistent with the [Chrome Web Store User Data Policy](https://developer.chrome.com/docs/webstore/program-policies/user-data), including its Limited Use requirements.
 
@@ -44,4 +46,4 @@ If you contact the maintainer for support, the information you choose to send is
 
 ## Contact
 
-For privacy questions or sensitive reports, email guoziyu415@gmail.com. For general questions, use [Answer Clipper GitHub Issues](https://github.com/guoziyu415/answer-clipper/issues). Do not send passwords, tokens, or entire private documents when asking for help.
+For privacy questions or sensitive reports, email guoziyu415@gmail.com. For general questions, use [AnyAnnotate GitHub Issues](https://github.com/guoziyu415/answer-clipper/issues). Do not send passwords, tokens, or entire private documents when asking for help.

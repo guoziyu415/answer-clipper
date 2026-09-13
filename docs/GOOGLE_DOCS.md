@@ -4,7 +4,7 @@ Google Docs is an optional Chrome extension feature. Local saving works without 
 
 ## One-time maintainer setup
 
-1. Open the [Google Cloud console](https://console.cloud.google.com/) and select the project you want to use for Answer Clipper.
+1. Open the [Google Cloud console](https://console.cloud.google.com/) and select the project you want to use for AnyAnnotate.
 2. Enable the [Google Docs API](https://console.cloud.google.com/apis/library/docs.googleapis.com).
 3. Configure Google Auth Platform branding, audience, and data access. For a testing audience, add the accounts that will test the app.
 4. Add `https://www.googleapis.com/auth/documents` to the requested scopes.
@@ -20,7 +20,7 @@ node scripts/configure-google-oauth.mjs YOUR_CLIENT_ID.apps.googleusercontent.co
 
 The client ID is public configuration, not a password. Do not enter a client secret or API key. Moving an unpacked extension to another folder or publishing with a different extension ID may require a matching OAuth client configuration. Preserve the published extension ID with Chrome's documented public-key workflow when preparing a release.
 
-This implementation uses the Docs `documents` scope to support an existing document chosen by its link without a separately hosted Google Picker. Google's consent screen permits access to the user's Google documents; it is not limited to one file by the scope itself. Answer Clipper only reads and appends to the document selected in its settings and creates a document only on request. Public distribution is subject to Google's [sensitive-scope verification requirements](https://developers.google.com/workspace/docs/api/auth). If the integration is redesigned around per-file authorization with Google Picker, the narrower `drive.file` scope is preferable.
+This implementation uses the Docs `documents` scope to support an existing document chosen by its link without a separately hosted Google Picker. Google's consent screen permits access to the user's Google documents; it is not limited to one file by the scope itself. AnyAnnotate only reads and appends to the document selected in its settings and creates a document only on request. Public distribution is subject to Google's [sensitive-scope verification requirements](https://developers.google.com/workspace/docs/api/auth). If the integration is redesigned around per-file authorization with Google Picker, the narrower `drive.file` scope is preferable.
 
 ## Save annotations
 

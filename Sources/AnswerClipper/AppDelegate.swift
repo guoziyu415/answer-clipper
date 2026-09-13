@@ -46,7 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.button?.image = NSImage(
             systemSymbolName: "highlighter",
-            accessibilityDescription: "Answer Clipper"
+            accessibilityDescription: "AnyAnnotate"
         )
 
         let menu = NSMenu()
@@ -62,7 +62,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(withTitle: "Restore Default Location", action: #selector(resetNoteFile), keyEquivalent: "")
         menu.addItem(.separator())
         menu.addItem(withTitle: "Accessibility Permission…", action: #selector(requestAccessibility), keyEquivalent: "")
-        menu.addItem(withTitle: "Quit Answer Clipper", action: #selector(quit), keyEquivalent: "q")
+        menu.addItem(withTitle: "Quit AnyAnnotate", action: #selector(quit), keyEquivalent: "q")
 
         for menuItem in menu.items {
             menuItem.target = self

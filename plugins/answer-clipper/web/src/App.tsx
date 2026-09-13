@@ -149,7 +149,7 @@ export default function App() {
   }, []);
 
   const { app, error } = useApp({
-    appInfo: { name: "Answer Clipper", version: "0.2.0" },
+    appInfo: { name: "AnyAnnotate", version: "0.2.0" },
     capabilities: {},
     onAppCreated: (createdApp: McpApp) => {
       createdApp.ontoolresult = (result) => acceptDraft(getDraft(result));

@@ -4,14 +4,14 @@ set -euo pipefail
 
 SCRIPT_DIR="${0:A:h}"
 PROJECT_DIR="${SCRIPT_DIR:h}"
-SOURCE_APP="$PROJECT_DIR/build/Answer Clipper.app"
+SOURCE_APP="$PROJECT_DIR/build/AnyAnnotate.app"
 DIST_DIR="$PROJECT_DIR/dist"
 VERSION="$(plutil -extract CFBundleShortVersionString raw -o - "$PROJECT_DIR/Resources/Info.plist")"
-ARCHIVE="$DIST_DIR/Answer-Clipper-macOS-v$VERSION.zip"
+ARCHIVE="$DIST_DIR/AnyAnnotate-macOS-v$VERSION.zip"
 SIGN_IDENTITY="${CODE_SIGN_IDENTITY:--}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-}"
 STAGING_DIR="$(mktemp -d "${TMPDIR:-/tmp}/answer-clipper-release.XXXXXX")"
-STAGED_APP="$STAGING_DIR/Answer Clipper.app"
+STAGED_APP="$STAGING_DIR/AnyAnnotate.app"
 VERIFY_DIR="$STAGING_DIR/verify"
 
 cleanup() {
@@ -33,7 +33,7 @@ xattr -cr "$STAGED_APP"
 codesign --verify --deep --strict --verbose=2 "$STAGED_APP"
 
 rm -f "$ARCHIVE"
-(cd "$STAGING_DIR" && zip -qry -X "$ARCHIVE" "Answer Clipper.app")
+(cd "$STAGING_DIR" && zip -qry -X "$ARCHIVE" "AnyAnnotate.app")
 
 if [[ -n "$NOTARY_PROFILE" ]]; then
     if [[ "$SIGN_IDENTITY" == "-" ]]; then
@@ -43,11 +43,11 @@ if [[ -n "$NOTARY_PROFILE" ]]; then
     xcrun notarytool submit "$ARCHIVE" --keychain-profile "$NOTARY_PROFILE" --wait
     xcrun stapler staple "$STAGED_APP"
     rm -f "$ARCHIVE"
-    (cd "$STAGING_DIR" && zip -qry -X "$ARCHIVE" "Answer Clipper.app")
+    (cd "$STAGING_DIR" && zip -qry -X "$ARCHIVE" "AnyAnnotate.app")
 fi
 
 unzip -q "$ARCHIVE" -d "$VERIFY_DIR"
-xattr -cr "$VERIFY_DIR/Answer Clipper.app"
-codesign --verify --deep --strict --verbose=2 "$VERIFY_DIR/Answer Clipper.app"
+xattr -cr "$VERIFY_DIR/AnyAnnotate.app"
+codesign --verify --deep --strict --verbose=2 "$VERIFY_DIR/AnyAnnotate.app"
 
 echo "Created $ARCHIVE"

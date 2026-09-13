@@ -12,15 +12,15 @@
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
-    "displayName": "Answer Clipper",
+    "displayName": "AnyAnnotate",
     "shortDescription": "Collect and annotate useful answer excerpts.",
     "longDescription": "Open a persistent note workspace, collect multiple excerpts, add private annotations, reorder or remove items, and export the result as Markdown or plain text.",
     "developerName": "guoziyu415",
     "category": "Productivity",
     "capabilities": ["Interactive", "Write"],
     "defaultPrompt": [
-      "Open my Answer Clipper workspace.",
-      "Add this excerpt to Answer Clipper.",
+      "Open my AnyAnnotate workspace.",
+      "Add this excerpt to AnyAnnotate.",
       "Show the excerpts I have collected."
     ],
     "brandColor": "#D97706"

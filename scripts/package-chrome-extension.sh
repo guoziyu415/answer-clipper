@@ -6,7 +6,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 EXTENSION_DIR="$ROOT_DIR/chrome-extension"
 DIST_DIR="$ROOT_DIR/dist"
 VERSION="$(sed -n 's/.*"version": "\([^"]*\)".*/\1/p' "$EXTENSION_DIR/manifest.json" | head -n 1)"
-ARCHIVE="$DIST_DIR/Answer-Clipper-Chrome-v$VERSION.zip"
+ARCHIVE="$DIST_DIR/AnyAnnotate-Chrome-v$VERSION.zip"
 
 mkdir -p "$DIST_DIR"
 rm -f "$ARCHIVE"

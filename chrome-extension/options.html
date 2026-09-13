@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Answer Clipper Settings</title>
+  <title>AnyAnnotate Settings</title>
   <link rel="stylesheet" href="settings.css">
 </head>
 <body>
   <main>
     <header>
       <img src="icons/icon-128.png" width="64" height="64" alt="">
-      <div><h1>Answer Clipper</h1><p>Save destinations and privacy settings</p></div>
+      <div><h1>AnyAnnotate</h1><p>Save destinations and privacy settings</p></div>
     </header>
 
     <section>
@@ -63,7 +63,7 @@
       <details id="google-panel" open>
         <summary>Google Docs <span class="badge" id="google-status">Not connected</span></summary>
         <p>Connect Google and choose a document to append annotations. Your local inbox is always kept.</p>
-        <p class="hint">Google's Docs permission allows access to your Google documents. Answer Clipper only reads or updates the document you choose and only creates a document when you ask.</p>
+        <p class="hint">Google's Docs permission allows access to your Google documents. AnyAnnotate only reads or updates the document you choose and only creates a document when you ask.</p>
         <div id="google-setup" class="hidden">
           <p>This build needs a Google OAuth client ID before it can connect. <a href="google-setup.html" target="_blank" rel="noopener">Setup instructions</a></p>
         </div>
@@ -76,7 +76,7 @@
           <input id="google-link" type="url" placeholder="https://docs.google.com/document/d/…/edit" maxlength="2000">
           <button id="google-select">Use This Document</button>
           <label for="google-title">Or create a new document</label>
-          <input id="google-title" value="Answer Clipper Notes" maxlength="200">
+          <input id="google-title" value="AnyAnnotate Notes" maxlength="200">
           <button id="google-create">Create Google Doc</button>
         </div>
         <div id="google-selected" class="file-row hidden">
@@ -92,7 +92,7 @@
 
     <section>
       <h2>Privacy</h2>
-      <p>Local saves stay on your device. Google Docs is optional: when you choose it, annotations and their source details are sent directly to Google. Answer Clipper has no server, analytics, or AI calls.</p>
+      <p>Local saves stay on your device. Google Docs is optional: when you choose it, annotations and their source details are sent directly to Google. AnyAnnotate has no server, analytics, or AI calls.</p>
     </section>
     <div id="message" class="message hidden" role="status"></div>
   </main>

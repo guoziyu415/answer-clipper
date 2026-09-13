@@ -53,7 +53,7 @@ test("omits unsupported source URLs and embedded credentials", () => {
 
 test("formats an export document", () => {
   const document = formatDocument([{ quote: "A", kind: "Thought" }, { quote: "B", kind: "Question" }]);
-  assert.ok(document.startsWith("# Answer Clipper\n\n"));
+  assert.ok(document.startsWith("# AnyAnnotate\n\n"));
   assert.equal((document.match(/^---$/gm) || []).length, 2);
 });
 
@@ -66,7 +66,7 @@ test("TXT exports use quotation marks and a short source title without field lab
   assert.doesNotMatch(text, /Category:|Tags:|Source:|Link:|Time:|Annotation:|https:\/\//);
   assert.doesNotMatch(text, /\*\*|^> |^## /m);
   const document = formatTextDocument([clip, { quote: "Another quote" }]);
-  assert.ok(document.startsWith("Answer Clipper\n\n"));
+  assert.ok(document.startsWith("AnyAnnotate\n\n"));
   assert.equal((document.match(/^--------------------$/gm) || []).length, 2);
   assert.doesNotMatch(formatTextEntry({ quote: "Just a quote" }), /Annotation:/);
 });
