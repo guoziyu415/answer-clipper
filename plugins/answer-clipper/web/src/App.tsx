@@ -258,7 +258,7 @@ export default function App() {
     <main className="workspace">
       <header className="workspace-header">
         <div>
-          <div className="eyebrow">ANSWER CLIPPER</div>
+          <div className="eyebrow">ANYANNOTATE</div>
           <input
             className="title-input"
             value={draft.title}
